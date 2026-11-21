@@ -1,0 +1,154 @@
+{
+  "website_info": {
+    "company_name": "Global Marine Supplies",
+    "legal_entity": "GMS Shipchandlers LLC",
+    "url": "https://globalmarinesupplies.com/",
+    "certification_status": "An ISO Certified & Verified Company"
+  },
+  "navigation": {
+    "links": [
+      { "id": "about", "label": "About" },
+      { "id": "stores", "label": "Stores" },
+      { "id": "services", "label": "Services" },
+      { "id": "sectors", "label": "Sectors" },
+      { "id": "network", "label": "Network" },
+      { "id": "contact", "label": "Contact" }
+    ],
+    "cta_label": "Request a quote",
+    "audio_label_on": "Mute ambient audio",
+    "audio_label_off": "Enable ambient audio",
+    "menu_open_label": "Open navigation menu",
+    "menu_close_label": "Close navigation menu",
+    "contact_pill_label": "Contact us",
+    "back_to_top_label": "Back to top"
+  },
+  "cursor_labels": {
+    "view": "View",
+    "drag": "Drag"
+  },
+  "preloader": {
+    "loading_prefix": "Loading",
+    "logo": "/logos/logo-trans.png",
+    "min_duration_ms": 1200,
+    "max_timeout_ms": 8000
+  },
+  "network_section": {
+    "eyebrow": "Global presence",
+    "title": "Worldwide Locations",
+    "subtitle": "Explore our extensive list of global offices, with operations at all ports of each country",
+    "search_placeholder": "Search a country...",
+    "office_badge": "Office",
+    "coverage_badge": "Coverage",
+    "open_24_7_badge": "24/7 Operations",
+    "directions_label": "Get directions",
+    "served_by_prefix": "Served by our",
+    "served_by_suffix": "office",
+    "show_office_label": "Show office",
+    "clear_selection_label": "Close details",
+    "no_results_label": "No matching locations found."
+  },
+  "contact_section": {
+    "heading": "Let's Connect",
+    "reassurance": "Our central operations desk is available 24/7. Reach out for a specialised quote or to enquire about our ship supply services.",
+    "operations_online_label": "Operations online",
+    "head_office_city": "Dubai",
+    "head_office_longitude": 55.2708,
+    "form_title": "Send an enquiry",
+    "form_endpoint": "",
+    "fields": {
+      "name_label": "Name",
+      "name_placeholder": "Capt. / Purchasing Superintendent",
+      "name_error": "Enter your name so our desk knows who to address.",
+      "company_label": "Company or Vessel",
+      "company_placeholder": "Shipping company or vessel name / IMO",
+      "company_error": "Enter your company or vessel name.",
+      "email_label": "Email",
+      "email_placeholder": "name@company.com",
+      "email_error": "Enter an email like name@company.com.",
+      "phone_label": "Phone",
+      "phone_placeholder": "+971 50 000 0000",
+      "phone_error": "Enter a valid phone number with country code (at least 7 digits).",
+      "message_label": "How can we help?",
+      "message_placeholder": "Port of call, ETA, and store or service requirements...",
+      "message_error": "Tell us briefly about your vessel's port call or requirements.",
+      "attachment_label": "Attach a file (optional)",
+      "attachment_hint": "PDF, XLSX, CSV, DOC or image up to 10 MB",
+      "attachment_remove_label": "Remove file",
+      "attachment_error_size": "File exceeds the 10 MB limit. Please attach a smaller file or email it directly.",
+      "attachment_error_type": "Accepted formats: PDF, Excel (.xlsx, .xls, .csv), Word (.doc, .docx), or image."
+    },
+    "submit": {
+      "idle_label": "Send enquiry",
+      "sending_label": "Sending enquiry",
+      "sent_label": "Enquiry sent",
+      "sent_confirmation": "Our 24/7 operations desk has received your request and will reply within 2 hours.",
+      "reset_label": "Send another enquiry",
+      "error_message": "We could not complete the transmission right now. Please try again or email your requisition directly to",
+      "requisition_note": "Sending a full requisition list? Email directly to"
+    },
+    "details_band": {
+      "col1_title": "Phone Lines",
+      "whatsapp_label": "WhatsApp us",
+      "whatsapp_url": "https://wa.me/971506990095",
+      "col2_title": "Email Addresses",
+      "email_labels": ["General", "Global Desk", "UAE Desk"],
+      "col3_title": "Office Address",
+      "directions_label": "Get directions",
+      "all_offices_label": "All offices"
+    },
+    "media": {
+      "loop_video": "/contact/contact.mp4",
+      "docked_video": "/contact/contact1.mp4",
+      "departing_video": "/contact/contact2.mp4",
+      "departed_video": "/contact/contact3.mp4",
+      "docked_poster": "/contact/contact1.jpg",
+      "departed_poster": "/contact/contact3.png"
+    }
+  },
+  "contact_and_offices": {
+    "emails": ["info@globalmarinesupplies.com", "world@globalmarinesupplies.com", "info@globalmarinesupplies.ae"],
+    "phones": ["+971 506990095", "+971 508834050", "+1 945 9972408"],
+    "head_office": {
+      "location_name": "Head Office",
+      "address": "114 & 115, Commercial Bank of Dubai Building, 1st Floor, Sheikh Zayed Road, Al Quoz, UAE"
+    }
+  },
+  "footer": {
+    "legal_statement": "An ISO Certified & Verified Company. GMS Shipchandlers LLC © All Rights Reserved.",
+    "creator_credit": "Site Designed & Developed with Precision by The Presence",
+    "back_to_top_label": "Back to top",
+    "copyright_year": "2026"
+  },
+  "contact_directory": {
+    "title": "Contact directory",
+    "main_contacts_heading": "Main contacts",
+    "operations_label": "24/7 operations",
+    "general_label": "General",
+    "whatsapp_label": "WhatsApp us",
+    "whatsapp_url": "https://wa.me/971506990095",
+    "departments_heading": "By department",
+    "departments": [
+      {
+        "name": "Sales & RFQs",
+        "email": "info@globalmarinesupplies.com",
+        "phone": "+971 506990095"
+      },
+      {
+        "name": "24/7 Operations",
+        "email": "world@globalmarinesupplies.com",
+        "phone": "+971 508834050"
+      },
+      {
+        "name": "UAE & Gulf Desk",
+        "email": "info@globalmarinesupplies.ae",
+        "phone": "+1 945 9972408"
+      }
+    ],
+    "countries_heading": "By country",
+    "search_placeholder": "Search a country or city…",
+    "show_on_globe_label": "Show on globe",
+    "office_badge": "Office",
+    "coverage_badge": "Coverage",
+    "served_by_prefix": "Served by"
+  }
+}

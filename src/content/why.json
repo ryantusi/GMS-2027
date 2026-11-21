@@ -1,0 +1,44 @@
+{
+  "section": {
+    "heading": "Why Choose Us?",
+    "subtitle": "Our commitment to professionalism, excellence and vessel satisfaction sets us apart as the perfect Ship Chandler"
+  },
+  "why_choose_us": [
+    {
+      "id": "quality",
+      "variant": "light",
+      "span": "long",
+      "icon": "quality",
+      "href": "#memberships",
+      "feature": "Uncompromised Quality of Stores",
+      "description": "Committed to procuring and supplying only the best quality of stores for vessel’s complete satisfaction and reliability; virtually removing any chance of supply related issues."
+    },
+    {
+      "id": "availability",
+      "variant": "dark",
+      "span": "short",
+      "icon": "clock",
+      "href": "#contact",
+      "feature": "24/7 Availability & Support",
+      "description": "We are available round the clock, across 10+ time zones, determined to assist you 24x7 regarding any queries, issues concerns and general assistance. Our all forms of contact is always monitored and replied swiftly."
+    },
+    {
+      "id": "pricing",
+      "variant": "blue",
+      "span": "short",
+      "icon": "pricing",
+      "href": "#contact",
+      "feature": "Competitive Prices for Enquiries",
+      "description": "Ensuring to quote our best and most competitive prices for our services and ship store enquiries. While others claim to assist in the most cost effective manner, we assure the same, while also promising zero compromise to quality and quantity."
+    },
+    {
+      "id": "network",
+      "variant": "light",
+      "span": "long",
+      "icon": "network",
+      "href": "#network",
+      "feature": "Exceptional Global Network & Reach",
+      "description": "With our offices and warehouses across various parts of the globe, spread across 24 different time zones and across 5 continents, we are your one stop Ship Chandler assisting your complete vessel needs at all Major and Minor ports of most countries, worldwide."
+    }
+  ]
+}

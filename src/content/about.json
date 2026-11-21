@@ -1,0 +1,53 @@
+{
+  "about_us": {
+    "eyebrow": "Who we are",
+    "heading": "Your trusted Marine Supply partner; Ensuring smooth sailing of your vessels",
+    "subheading": "One stop Ship Chandlers; At a Global level",
+    "description": "We at Global Marine Supplies, are Complete Ship Store Suppliers (Ship Chandlers), dealing complete supplies for vessels calling any port, Globally. With our head office in the UAE, and warehouse branches at India, Egypt, Turkey, Singapore, Sri Lanka & Bangladesh, Our group comprises a team of highly skilled and professional workforce, with more than 30+ years of experience in the maritime supply industry.",
+    "scope_eyebrow": "Our scope of supply",
+    "scope_summary": "Our scope covers the supply of A to Z, Complete Ship Supplies which includes Provisions, Technical, Engine, Deck, Cabin, Safety/Anti Piracy, Wire & Mooring Ropes, Marine Chemicals & Gases, LSA FFA, Bonded Stores, etc. We also undertake various ship services like Waste Disposal, Cash to Master, Motor Rewinding, Maintenance & Repair, Delivery of Spares, etc.",
+    "collage": [
+      {
+        "id": "warehouse",
+        "label": "Bonded & Cold-Chain Warehouse",
+        "sublabel": "UAE Head Office · Temperature-controlled staging",
+        "aspect_ratio": "4 / 5",
+        "icon": "buildings",
+        "parallax_rate": 0.85
+      },
+      {
+        "id": "launch-delivery",
+        "label": "Launch Boat & Anchorage Delivery",
+        "sublabel": "24/7 alongside & off-port limits (OPL) dispatch",
+        "aspect_ratio": "16 / 10",
+        "icon": "ship",
+        "parallax_rate": 0.9
+      },
+      {
+        "id": "team-inspection",
+        "label": "Quality & IMPA Inspection Desk",
+        "sublabel": "30+ years maritime chandling expertise",
+        "aspect_ratio": "3 / 4",
+        "icon": "compass",
+        "parallax_rate": 0.95
+      }
+    ]
+  },
+  "counter": [
+    {
+      "text": "Countries Served",
+      "count": 75,
+      "suffix": "+"
+    },
+    {
+      "text": "Ports Served",
+      "count": 1000,
+      "suffix": "+"
+    },
+    {
+      "text": "Vessels Served",
+      "count": 2500,
+      "suffix": "+"
+    }
+  ]
+}

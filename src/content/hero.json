@@ -1,0 +1,24 @@
+{
+  "hero_section": {
+    "title": "Worldwide Ship Supplies & Services",
+    "subtitle": "Determined to serve your vessels with Complete Ship Store requirements across every Major & Minor Ports, Globally.",
+    "tagline": "Get your supplies done, reliably and efficiently. Every time, with the utmost convenience and cost-effective procurement.",
+    "scroll": "Scroll down to explore",
+    "media": {
+      "idle_video": "/hero/C0.mp4",
+      "poster": "/frames/hero/desktop/0001.webp",
+      "desktop_frames_dir": "/frames/hero/desktop",
+      "mobile_frames_dir": "/frames/hero/mobile",
+      "frame_count": 170,
+      "frame_pad": 4,
+      "frame_ext": "webp"
+    },
+    "pill_logos": [
+      { "name": "IMPA", "logo": "/logos/impa.png" },
+      { "name": "ISSA", "logo": "/logos/ISSA.png" },
+      { "name": "ISO 9001", "logo": "/logos/ISO9001.png" },
+      { "name": "ISO 22000", "logo": "/logos/ISO22000.png" },
+      { "name": "Procureship", "logo": "/logos/procureship.png" }
+    ]
+  }
+}

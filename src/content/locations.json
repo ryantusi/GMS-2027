@@ -1,0 +1,594 @@
+{
+  "worldwide_locations": {
+    "Asia": [
+      {
+        "country": "Bahrain",
+        "latitude": 26.0667,
+        "longitude": 50.5577,
+        "type": "coverage"
+      },
+      {
+        "country": "Bangladesh",
+        "latitude": 23.685,
+        "longitude": 90.3563,
+        "type": "office",
+        "address": "No. 1100, Tower of Millennium, Agrabad Access Street, Hajipara, Chittagong",
+        "email": "bangladesh@globalmarinesupplies.com"
+      },
+      {
+        "country": "Brunei",
+        "latitude": 4.5353,
+        "longitude": 114.7277,
+        "type": "coverage"
+      },
+      {
+        "country": "China",
+        "latitude": 35.8617,
+        "longitude": 104.1954,
+        "type": "office",
+        "address": "Office No. 129, Hebeidajie Street (East Section), Haigang, Qinhuangdao",
+        "email": "china@globalmarinesupplies.com"
+      },
+      {
+        "country": "Hong Kong",
+        "latitude": 22.3193,
+        "longitude": 114.1694,
+        "type": "coverage"
+      },
+      {
+        "country": "India",
+        "latitude": 20.5937,
+        "longitude": 78.9629,
+        "type": "office",
+        "address": "1st Floor, Global Business Building, Bandari Street, Mumbai, Maharashtra, 400 003",
+        "email": "india@globalmarinesupplies.com"
+      },
+      {
+        "country": "Indonesia",
+        "latitude": -0.7893,
+        "longitude": 113.9213,
+        "type": "office",
+        "address": "RT10/05, Hasyim Link Kramat (Tegal Ratu), Cigading Ciwandan Cilegon Banten - Indonesia (42445)",
+        "email": "indonesia@globalmarinesupplies.com"
+      },
+      {
+        "country": "Japan",
+        "latitude": 36.2048,
+        "longitude": 138.2529,
+        "type": "coverage"
+      },
+      {
+        "country": "Jordan",
+        "latitude": 30.5852,
+        "longitude": 36.2384,
+        "type": "office",
+        "address": "Office No. 045, Main Street, Aqaba (77110)",
+        "email": "jordan@globalmarinesupplies.com"
+      },
+      {
+        "country": "Kuwait",
+        "latitude": 29.3117,
+        "longitude": 47.4818,
+        "type": "coverage"
+      },
+      {
+        "country": "Lebanon",
+        "latitude": 33.8547,
+        "longitude": 35.8623,
+        "type": "coverage"
+      },
+      {
+        "country": "Malaysia",
+        "latitude": 4.2105,
+        "longitude": 101.9758,
+        "type": "office",
+        "address": "No. 35, Street Jalan Lengkungan Raja Lumu, Kawasan Perindustrian Pandamaran, Port Klang - (42000)",
+        "email": "malaysia@globalmarinesupplies.com"
+      },
+      {
+        "country": "Maldives",
+        "latitude": 3.2028,
+        "longitude": 73.2207,
+        "type": "coverage"
+      },
+      {
+        "country": "Malta",
+        "latitude": 35.9375,
+        "longitude": 14.3754,
+        "type": "office",
+        "address": "No. 65, Street Birkirkara Hill St Julians, Malta",
+        "email": "malta@globalmarinesupplies.com"
+      },
+      {
+        "country": "Mauritius",
+        "latitude": -20.3484,
+        "longitude": 57.5522,
+        "type": "coverage"
+      },
+      {
+        "country": "Myanmar",
+        "latitude": 21.9162,
+        "longitude": 95.956,
+        "type": "coverage"
+      },
+      {
+        "country": "Oman",
+        "latitude": 21.5126,
+        "longitude": 55.9233,
+        "type": "coverage"
+      },
+      {
+        "country": "Pakistan",
+        "latitude": 30.3753,
+        "longitude": 69.3451,
+        "type": "office",
+        "address": "Office No. 1, Al Rahman Center Building, Saddar Wellington Street, Karachi",
+        "email": "pakistan@globalmarinesupplies.com"
+      },
+      {
+        "country": "Philippines",
+        "latitude": 12.8797,
+        "longitude": 121.774,
+        "type": "office",
+        "address": "Press Drive Str., No. 11 Block 6, San Antonio, Sucat Paranaque - (1700)",
+        "email": "philippines@globalmarinesupplies.com"
+      },
+      {
+        "country": "Qatar",
+        "latitude": 25.3548,
+        "longitude": 51.1839,
+        "type": "coverage"
+      },
+      {
+        "country": "Saudi Arabia",
+        "latitude": 23.8859,
+        "longitude": 45.0792,
+        "type": "office",
+        "address": "Office No. 6650, Madeena Street, Disctrict of Faiseliyah, Jeddah - (23441)",
+        "email": "saudi@globalmarinesupplies.com"
+      },
+      {
+        "country": "Singapore",
+        "latitude": 1.3521,
+        "longitude": 103.8198,
+        "type": "office",
+        "address": "No. 20, Industrial Park (Ang Mo Kio) No. 2A, AMK Techlink No. 05 05, 567761",
+        "email": "singapore@globalmarinesupplies.com"
+      },
+      {
+        "country": "South Korea",
+        "latitude": 35.9078,
+        "longitude": 127.7669,
+        "type": "coverage"
+      },
+      {
+        "country": "Sri Lanka",
+        "latitude": 7.8731,
+        "longitude": 80.7718,
+        "type": "office",
+        "address": "No. 05, Street George R. De Silva Mawatha 89, Colombo - Sri Lanka (01300)",
+        "email": "srilanka@globalmarinesupplies.com"
+      },
+      {
+        "country": "Taiwan",
+        "latitude": 23.6978,
+        "longitude": 120.9605,
+        "type": "coverage"
+      },
+      {
+        "country": "Thailand",
+        "latitude": 15.87,
+        "longitude": 100.9925,
+        "type": "coverage"
+      },
+      {
+        "country": "Turkey",
+        "latitude": 38.9637,
+        "longitude": 35.2433,
+        "type": "office",
+        "address": "Sok No. 37, T Palaza, Icerenkoy Mah. Bahcelerarasi, Atasehir, Istanbul - 34752",
+        "email": "turkey@globalmarinesupplies.com"
+      },
+      {
+        "country": "United Arab Emirates",
+        "latitude": 23.4241,
+        "longitude": 53.8478,
+        "type": "office",
+        "address": "114 & 115, Commercial Bank of Dubai Building, 1st Floor, Sheikh Zayed Road, Al Quoz, Dubai - United Arab Emirates",
+        "email": "info@globalmarinesupplies.com"
+      },
+      {
+        "country": "Vietnam",
+        "latitude": 14.0583,
+        "longitude": 108.2772,
+        "type": "coverage"
+      },
+      {
+        "country": "Yemen",
+        "latitude": 15.5527,
+        "longitude": 48.5164,
+        "type": "coverage"
+      }
+    ],
+    "Europe": [
+      {
+        "country": "Belgium",
+        "latitude": 50.5039,
+        "longitude": 4.4699,
+        "type": "coverage"
+      },
+      {
+        "country": "Bulgaria",
+        "latitude": 42.7339,
+        "longitude": 25.4858,
+        "type": "coverage"
+      },
+      {
+        "country": "Croatia",
+        "latitude": 45.1,
+        "longitude": 15.2,
+        "type": "coverage"
+      },
+      {
+        "country": "Cyprus",
+        "latitude": 35.1264,
+        "longitude": 33.4299,
+        "type": "coverage"
+      },
+      {
+        "country": "Denmark",
+        "latitude": 56.2639,
+        "longitude": 9.5018,
+        "type": "coverage"
+      },
+      {
+        "country": "Estonia",
+        "latitude": 58.5953,
+        "longitude": 25.0136,
+        "type": "coverage"
+      },
+      {
+        "country": "France",
+        "latitude": 46.6034,
+        "longitude": 2.2137,
+        "type": "coverage"
+      },
+      {
+        "country": "Germany",
+        "latitude": 51.1657,
+        "longitude": 10.4515,
+        "type": "coverage"
+      },
+      {
+        "country": "Gibraltar",
+        "latitude": 36.1408,
+        "longitude": -5.4536,
+        "type": "office",
+        "address": "La Menacha Pol. Ind., Campo de Gibraltar - Parcela 3.2, Algeciras (11205)",
+        "email": "gibraltar@globalmarinesupplies.com"
+      },
+      {
+        "country": "Ireland",
+        "latitude": 53.1424,
+        "longitude": -7.6921,
+        "type": "coverage"
+      },
+      {
+        "country": "Italy",
+        "latitude": 41.8719,
+        "longitude": 12.5674,
+        "type": "office",
+        "address": "No. 01, Street Via Sante Cettolini 33, Elma 09067",
+        "email": "italy@globalmarinesupplies.com"
+      },
+      {
+        "country": "Netherlands",
+        "latitude": 52.1326,
+        "longitude": 5.2913,
+        "type": "coverage"
+      },
+      {
+        "country": "Norway",
+        "latitude": 60.472,
+        "longitude": 8.4689,
+        "type": "coverage"
+      },
+      {
+        "country": "Portugal",
+        "latitude": 39.3999,
+        "longitude": -8.2245,
+        "type": "coverage"
+      },
+      {
+        "country": "Romania",
+        "latitude": 45.9432,
+        "longitude": 24.9668,
+        "type": "coverage"
+      },
+      {
+        "country": "Spain",
+        "latitude": 40.4637,
+        "longitude": -3.7492,
+        "type": "office",
+        "address": "La Menacha Pol. Ind., Campo de Gibraltar - Parcela 3.2, Algeciras (11205)",
+        "email": "spain@globalmarinesupplies.com"
+      },
+      {
+        "country": "United Kingdom",
+        "latitude": 55.3781,
+        "longitude": -3.436,
+        "type": "coverage"
+      }
+    ],
+    "America": {
+      "North America": [
+        {
+          "country": "The Bahamas",
+          "latitude": 25.0343,
+          "longitude": -77.3963,
+          "type": "coverage"
+        },
+        {
+          "country": "Canada",
+          "latitude": 56.1304,
+          "longitude": -106.3468,
+          "type": "coverage"
+        },
+        {
+          "country": "Cuba",
+          "latitude": 21.5218,
+          "longitude": -77.7812,
+          "type": "coverage"
+        },
+        {
+          "country": "Guatemala",
+          "latitude": 15.7835,
+          "longitude": -90.2308,
+          "type": "office",
+          "address": "Office No. 7A, 14-44 Ave., Zone No. 9, Edificio La Galeria, Guatemala City",
+          "email": "guatemala@globalmarinesupplies.com"
+        },
+        {
+          "country": "Haiti",
+          "latitude": 18.9712,
+          "longitude": -72.2852,
+          "type": "coverage"
+        },
+        {
+          "country": "Honduras",
+          "latitude": 15.2,
+          "longitude": -86.2419,
+          "type": "coverage"
+        },
+        {
+          "country": "Mexico",
+          "latitude": 23.6345,
+          "longitude": -102.5528,
+          "type": "office",
+          "address": "No. 264, Colonia Centro, Calle Jose Maria Morelos, Lazaro Cardenas - (60950)",
+          "email": "mexico@globalmarinesupplies.com"
+        },
+        {
+          "country": "Panama",
+          "latitude": 8.538,
+          "longitude": -80.7821,
+          "type": "office",
+          "address": "Tower No. 300, The Bayview Building, 9th Floor",
+          "email": "panama@globalmarinesupplies.com"
+        },
+        {
+          "country": "United States",
+          "latitude": 37.0902,
+          "longitude": -95.7129,
+          "type": "office",
+          "address": "No. 620, Armour Drive Road, Houston, Texas (77020)",
+          "email": "usa@globalmarinesupplies.com"
+        }
+      ],
+      "South America": [
+        {
+          "country": "Argentina",
+          "latitude": -38.4161,
+          "longitude": -63.6167,
+          "type": "office",
+          "address": "Warehouse No. 034, Street Pacto Federal 8535, Santa Fe (Rosario)",
+          "email": "argentina@globalmarinesupplies.com"
+        },
+        {
+          "country": "Brazil",
+          "latitude": -14.235,
+          "longitude": -51.9253,
+          "type": "office",
+          "address": "No. 3051, Iraci, R Clotildes Pereira da Costa, Itacoatiara - Brazil (69101-134)",
+          "email": "brazil@globalmarinesupplies.com"
+        },
+        {
+          "country": "Chile",
+          "latitude": -35.6751,
+          "longitude": -71.543,
+          "type": "coverage"
+        },
+        {
+          "country": "Colombia",
+          "latitude": 4.5709,
+          "longitude": -74.2973,
+          "type": "coverage"
+        },
+        {
+          "country": "Ecuador",
+          "latitude": -1.8312,
+          "longitude": -78.1834,
+          "type": "coverage"
+        },
+        {
+          "country": "Peru",
+          "latitude": -9.19,
+          "longitude": -75.0152,
+          "type": "coverage"
+        },
+        {
+          "country": "Uruguay",
+          "latitude": -32.5228,
+          "longitude": -55.7658,
+          "type": "coverage"
+        },
+        {
+          "country": "Venezuela",
+          "latitude": 6.4238,
+          "longitude": -66.5897,
+          "type": "coverage"
+        }
+      ]
+    },
+    "Africa": [
+      {
+        "country": "Angola",
+        "latitude": -11.2027,
+        "longitude": 17.8739,
+        "type": "office",
+        "address": "Office No. 24, Ground Floor, Burma Street (Apapa), Lagos - Nigeria (100001)",
+        "email": "angola@globalmarinesupplies.com"
+      },
+      {
+        "country": "Benin",
+        "latitude": 9.3077,
+        "longitude": 2.3158,
+        "type": "coverage"
+      },
+      {
+        "country": "Djibouti",
+        "latitude": 11.8251,
+        "longitude": 42.5903,
+        "type": "office",
+        "address": "No. 101, Building Name: Plaza Habo, XM37+43M, The Mombasa Road, Mombasa - Kenya",
+        "email": "djibouti@globalmarinesupplies.com"
+      },
+      {
+        "country": "Egypt",
+        "latitude": 26.8206,
+        "longitude": 30.8025,
+        "type": "office",
+        "address": "No. 18 Warehouse, El Ghish and Safiyah Zaghloul Street, Port Said - 42111",
+        "email": "egypt@globalmarinesupplies.com"
+      },
+      {
+        "country": "Gabon",
+        "latitude": -0.8037,
+        "longitude": 11.6094,
+        "type": "office",
+        "address": "Office No. 24, Ground Floor, Burma Street (Apapa), Lagos - Nigeria (100001)",
+        "email": "gabon@globalmarinesupplies.com"
+      },
+      {
+        "country": "Ghana",
+        "latitude": 7.9465,
+        "longitude": -1.0232,
+        "type": "office",
+        "address": "Office No. 24, Ground Floor, Burma Street (Apapa), Lagos - Nigeria (100001)",
+        "email": "ghana@globalmarinesupplies.com"
+      },
+      {
+        "country": "Guinea",
+        "latitude": 9.9456,
+        "longitude": -9.6966,
+        "type": "coverage"
+      },
+      {
+        "country": "Ivory Coast",
+        "latitude": 7.54,
+        "longitude": -5.5471,
+        "type": "office",
+        "address": "No. 21, Rue 38, Pres Eglise Notre Dame, Treichville (Abidjan) - Côte d'Ivoire",
+        "email": "ivorycoast@globalmarinesupplies.com"
+      },
+      {
+        "country": "Kenya",
+        "latitude": -0.0236,
+        "longitude": 37.9062,
+        "type": "office",
+        "address": "No. 101, Building Name: Plaza Habo, XM37+43M, The Mombasa Road, Mombasa - Kenya",
+        "email": "kenya@globalmarinesupplies.com"
+      },
+      {
+        "country": "Libya",
+        "latitude": 26.3351,
+        "longitude": 17.2283,
+        "type": "coverage"
+      },
+      {
+        "country": "Mauritius",
+        "latitude": -20.3484,
+        "longitude": 57.5522,
+        "type": "coverage"
+      },
+      {
+        "country": "Morocco",
+        "latitude": 31.7917,
+        "longitude": -7.0926,
+        "type": "office",
+        "address": "Office Hay Moulay Ain Chock, Ground Floor, Casablanca City - Morocco",
+        "email": "morocco@globalmarinesupplies.com"
+      },
+      {
+        "country": "Mozambique",
+        "latitude": -18.6657,
+        "longitude": 35.5296,
+        "type": "coverage"
+      },
+      {
+        "country": "Nigeria",
+        "latitude": 9.082,
+        "longitude": 8.6753,
+        "type": "office",
+        "address": "Office No. 24, Ground Floor, Burma Street (Apapa), Lagos - Nigeria (100001)",
+        "email": "nigeria@globalmarinesupplies.com"
+      },
+      {
+        "country": "Senegal",
+        "latitude": 14.4974,
+        "longitude": -14.4524,
+        "type": "coverage"
+      },
+      {
+        "country": "Seychelles",
+        "latitude": -4.6796,
+        "longitude": 55.492,
+        "type": "coverage"
+      },
+      {
+        "country": "South Africa",
+        "latitude": -30.5595,
+        "longitude": 22.9375,
+        "type": "coverage"
+      },
+      {
+        "country": "Togo",
+        "latitude": 8.6195,
+        "longitude": 0.8248,
+        "type": "office",
+        "address": "Office No. 24, Ground Floor, Burma Street (Apapa), Lagos - Nigeria (100001)",
+        "email": "togo@globalmarinesupplies.com"
+      },
+      {
+        "country": "Tunisia",
+        "latitude": 33.8869,
+        "longitude": 9.5375,
+        "type": "coverage"
+      }
+    ],
+    "Oceania": [
+      {
+        "country": "Australia",
+        "latitude": -25.2744,
+        "longitude": 133.7751,
+        "type": "coverage"
+      },
+      {
+        "country": "New Zealand",
+        "latitude": -40.9006,
+        "longitude": 174.886,
+        "type": "coverage"
+      }
+    ]
+  }
+}

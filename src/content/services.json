@@ -1,0 +1,115 @@
+{
+  "ship_services": {
+    "eyebrow": "Technical Ship Services",
+    "title": "Complete Marine Engineering and Ship Services for smooth sailing",
+    "description": "With the help of well established group of technicians and professional workers at every Major port across the globe, Global Marine Supplies provides various marine services.",
+    "media": {
+      "photo": "/services/ship.png",
+      "blueprint": "/services/blueprint.png",
+      "vessel_designation": "VLCC / Technical Service General Arrangement · Scale 1:500"
+    },
+    "services_list": [
+      "Maintenance & Repair",
+      "Delivery of Spares (Onboard)",
+      "Motor Rewinding",
+      "Waste and Garbage Disposal",
+      "Cash to Master",
+      "Procurement of Ship Spares",
+      "Tank Cleaning Services",
+      "Underwater Services",
+      "Agency Services (at selected ports)"
+    ],
+    "items": [
+      {
+        "name": "Procurement of Ship Spares",
+        "icon": "cube",
+        "zone": "Forward Forecastle",
+        "description": "Global OEM and class-certified spare part sourcing for deck machinery, valves and pumps.",
+        "boxX": 9.2,
+        "boxY": 50,
+        "hullX": 23.5,
+        "hullY": 50
+      },
+      {
+        "name": "Tank Cleaning Services",
+        "icon": "drop",
+        "zone": "Cargo Tanks",
+        "description": "High-pressure butterworth washing, gas-freeing, mucking and cargo hold preparation.",
+        "boxX": 27,
+        "boxY": 13,
+        "hullX": 40,
+        "hullY": 41
+      },
+      {
+        "name": "Delivery of Spares (Onboard)",
+        "icon": "package",
+        "zone": "Midship Crane & Manifold",
+        "description": "Customs clearance, warehousing and launch-boat or crane transfer directly onto the deck.",
+        "boxX": 48.5,
+        "boxY": 13,
+        "hullX": 56,
+        "hullY": 40
+      },
+      {
+        "name": "Agency Services (at selected ports)",
+        "icon": "compass",
+        "zone": "Bridge & Navigation",
+        "description": "Full port clearance, husbandry, crew change logistics and port authority coordination.",
+        "boxX": 70,
+        "boxY": 13,
+        "hullX": 87.5,
+        "hullY": 38
+      },
+      {
+        "name": "Cash to Master",
+        "icon": "shield",
+        "zone": "Master's Cabin",
+        "description": "Secure, insured onboard USD cash delivery directly to the Master with full port compliance.",
+        "boxX": 91,
+        "boxY": 13,
+        "hullX": 92,
+        "hullY": 44
+      },
+      {
+        "name": "Waste and Garbage Disposal",
+        "icon": "lifebuoy",
+        "zone": "MARPOL Reception",
+        "description": "Certified MARPOL Annex I–V sludge, bilge water and segregated garbage barge reception.",
+        "boxX": 27,
+        "boxY": 87,
+        "hullX": 56,
+        "hullY": 59
+      },
+      {
+        "name": "Maintenance & Repair",
+        "icon": "wrench",
+        "zone": "Aft Machinery Space",
+        "description": "Riding squads and certified port technicians for structural welding, pipework and valve overhauls.",
+        "boxX": 48.5,
+        "boxY": 87,
+        "hullX": 80,
+        "hullY": 59
+      },
+      {
+        "name": "Motor Rewinding",
+        "icon": "lightning",
+        "zone": "Engine Room",
+        "description": "Rapid shore-workshop and voyage rewinding, dynamic balancing and varnish curing for marine motors.",
+        "boxX": 70,
+        "boxY": 87,
+        "hullX": 93,
+        "hullY": 56
+      },
+      {
+        "name": "Underwater Services",
+        "icon": "anchor",
+        "zone": "Hull & Propeller",
+        "description": "Class-approved hull cleaning, propeller polishing, CCTV inspection and sea-chest grating work.",
+        "boxX": 91,
+        "boxY": 87,
+        "hullX": 97,
+        "hullY": 57
+      }
+    ]
+  }
+}

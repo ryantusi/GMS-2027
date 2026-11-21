@@ -1,0 +1,122 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+@theme {
+  --color-sea-salt: var(--sea-salt);
+  --color-harbour-mist: var(--harbour-mist);
+  --color-signal-blue: var(--signal-blue);
+  --color-deep-hull: var(--deep-hull);
+  --color-night-port: var(--night-port);
+  --color-brass: var(--brass);
+  --color-warm-paper: var(--warm-paper);
+  --color-warm-sand: var(--warm-sand);
+  --color-deep-teal: var(--deep-teal);
+  --color-sonar-cyan: var(--sonar-cyan);
+
+  --font-display: 'Marcellus', Georgia, serif;
+  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --radius-container: var(--radius-lg);
+  --radius-panel: var(--radius-md);
+  --radius-control: var(--radius-sm);
+  --radius-pill: var(--radius-pill);
+
+  --shadow-hull: var(--shadow-tinted);
+  --shadow-hull-lg: var(--shadow-tinted-lg);
+}
+
+@layer base {
+  html {
+    background-color: var(--sea-salt);
+    color: var(--deep-hull);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    margin: 0;
+    overflow-x: hidden;
+    background-color: var(--sea-salt);
+    color: var(--deep-hull);
+  }
+
+  /* Hide native cursor only on fine-pointer devices; restore native text caret on inputs (DESIGN.md G2) */
+  @media (pointer: fine) {
+    html.has-custom-cursor,
+    html.has-custom-cursor body,
+    html.has-custom-cursor a,
+    html.has-custom-cursor button,
+    html.has-custom-cursor [role="button"],
+    html.has-custom-cursor [role="tab"] {
+      cursor: none;
+    }
+
+    html.has-custom-cursor input[type="text"],
+    html.has-custom-cursor input[type="email"],
+    html.has-custom-cursor input[type="tel"],
+    html.has-custom-cursor input[type="search"],
+    html.has-custom-cursor input[type="url"],
+    html.has-custom-cursor input[type="number"],
+    html.has-custom-cursor input[type="password"],
+    html.has-custom-cursor textarea,
+    html.has-custom-cursor [contenteditable="true"] {
+      cursor: text;
+    }
+  }
+
+  /* Focus ring accessibility rules (DESIGN.md 3.5) */
+  [data-nav-theme="light"] *:focus-visible,
+  *:focus-visible {
+    outline: 2px solid var(--deep-teal);
+    outline-offset: 3px;
+  }
+
+  [data-nav-theme="dark"] *:focus-visible {
+    outline: 2px solid var(--sonar-cyan);
+    outline-offset: 3px;
+  }
+}
+
+/* Tabular numerals helper (DESIGN.md 1.3) */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Glass surface utilities with solid fallbacks (DESIGN.md 1.3) */
+.glass-light {
+  background-color: var(--glass-light-fallback);
+  border-bottom: 1px solid var(--glass-light-border);
+  box-shadow: var(--shadow-tinted);
+}
+
+@supports (backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px)) {
+  .glass-light {
+    background-color: var(--glass-light-bg);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    backdrop-filter: blur(16px) saturate(160%);
+  }
+}
+
+.glass-dark {
+  background-color: var(--glass-dark-fallback);
+  border-bottom: 1px solid var(--glass-dark-border);
+  box-shadow: var(--glass-dark-highlight), var(--shadow-tinted);
+}
+
+@supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
+  .glass-dark {
+    background-color: var(--glass-dark-bg);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    backdrop-filter: blur(20px) saturate(140%);
+  }
+}
+
+/* Warm drawing office technical grid (DESIGN.md Section 6) */
+.bg-drawing-grid {
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, rgba(0, 119, 134, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 119, 134, 0.06) 1px, transparent 1px);
+}

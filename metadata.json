@@ -1,0 +1,6 @@
+{
+  "name": "Premium Global Landing Experience",
+  "description": "Architecture and dependency scaffolding for a high-craft corporate landing page powered by React, GSAP, Lenis, Zustand, and react-globe.gl.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

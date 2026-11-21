@@ -1,0 +1,58 @@
+{
+  "section": {
+    "heading": "Sectors We Serve",
+    "subtitle": "We serve, supply and cater any ship requirements across various shipping sectors",
+    "background_video": "/sectors/Sectors1.mp4"
+  },
+  "sectors_served": [
+    {
+      "id": "commercial",
+      "sector": "Commercial Vessels",
+      "data": "2000",
+      "suffix": "+",
+      "subtypes": [
+        "Container Feeders & ULCVs",
+        "Bulk Carriers",
+        "VLCC / Chemical Tankers",
+        "LNG & LPG Carriers",
+        "Ro-Ro & General Cargo"
+      ]
+    },
+    {
+      "id": "passenger",
+      "sector": "Passenger Vessels",
+      "data": "50",
+      "suffix": "+",
+      "subtypes": [
+        "Ocean Cruise Liners",
+        "Expedition Cruise Ships",
+        "Ro-Pax Ferries",
+        "Superyachts"
+      ]
+    },
+    {
+      "id": "tugs",
+      "sector": "Tug Boats",
+      "data": "500",
+      "suffix": "+",
+      "subtypes": [
+        "Harbour & Terminal Tugs",
+        "Anchor Handling (AHTS)",
+        "Platform Supply (PSV)",
+        "Offshore Support & Crew Boats"
+      ]
+    },
+    {
+      "id": "navy",
+      "sector": "Navy Vessels",
+      "data": "15",
+      "suffix": "+",
+      "subtypes": [
+        "Frigates & Corvettes",
+        "Fleet Replenishment Oilers",
+        "Offshore Patrol Vessels (OPV)",
+        "Coast Guard Cutters"
+      ]
+    }
+  ]
+}

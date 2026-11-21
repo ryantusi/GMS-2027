@@ -1,0 +1,135 @@
+{
+  "section": {
+    "eyebrow": "Explore our comprehensive list of Ship Stores we provide to vessels Worldwide",
+    "heading": "Ship Supplies",
+    "request_prefix": "Request",
+    "autoplay_seconds": 5,
+    "pause_label": "Paused",
+    "playing_label": "Auto-cycling"
+  },
+  "ship_supplies": [
+    {
+      "id": "provision-stores",
+      "store_name": "Provision Stores",
+      "image": "/stores/01-provision.jpeg",
+      "icon": "package",
+      "description": "Your one-stop shop for daily essentials, quality groceries, and fresh produce",
+      "items": [
+        "Fresh produce (fruits and vegetables)",
+        "Dairy products and eggs",
+        "Meat, poultry, and seafood",
+        "Dry groceries and pantry essentials",
+        "Beverages and canned goods"
+      ]
+    },
+    {
+      "id": "engine-stores",
+      "store_name": "Engine Stores",
+      "image": "/stores/08-engine.png",
+      "icon": "wrench",
+      "description": "High-quality engine parts, lubricants, and accessories for all your maintenance needs",
+      "items": [
+        "Engine spare parts and accessories",
+        "Lubricants and oils",
+        "Valves, cocks, and fittings",
+        "Gaskets, packings, and jointings",
+        "Hand tools and pneumatic tools"
+      ]
+    },
+    {
+      "id": "deck-stores",
+      "store_name": "Deck Stores",
+      "image": "/stores/06-deck.png",
+      "icon": "anchor",
+      "description": "Comprehensive selection of tools, equipment, and supplies for a well-equipped and safe deck",
+      "items": [
+        "Wire and mooring ropes",
+        "Rigging hardware and shackles",
+        "Paints, brushes, and coating supplies",
+        "Anti-piracy equipment and security gear",
+        "Cleaning equipment and deck maintenance tools"
+      ]
+    },
+    {
+      "id": "electrical-stores",
+      "store_name": "Electrical Stores",
+      "image": "/stores/09-electrical.png",
+      "icon": "lightning",
+      "description": "Reliable electrical supplies, cables, and components to meet all your power needs",
+      "items": [
+        "Marine cables and wiring",
+        "Lighting fixtures and LED bulbs",
+        "Electrical switches, plugs, and sockets",
+        "Fuses, circuit breakers, and relays",
+        "Motors and electrical accessories"
+      ]
+    },
+    {
+      "id": "cabin-stores",
+      "store_name": "Cabin Stores",
+      "image": "/stores/02-cabin.jpeg",
+      "icon": "cube",
+      "description": "Comfortable, stylish furnishings, and amenities to enhance your cabin's comfort",
+      "items": [
+        "Bedding, linens, pillows, and blankets",
+        "Galley utensils, tableware, and messroom supplies",
+        "Bathroom amenities and toiletries",
+        "Furnishings, curtains, and carpets",
+        "Cleaning supplies and laundry products"
+      ]
+    },
+    {
+      "id": "safety-stores",
+      "store_name": "Safety Stores",
+      "image": "/stores/05-safety.jpg",
+      "icon": "lifebuoy",
+      "description": "Comprehensive safety gear, protective equipment, and supplies to ensure your protection",
+      "items": [
+        "Personal Protective Equipment (PPE)",
+        "Life-Saving Appliances (LSA)",
+        "Fire-Fighting Appliances (FFA)",
+        "Gas detectors and safety harnesses",
+        "First aid kits and emergency supplies"
+      ]
+    },
+    {
+      "id": "stationery-stores",
+      "store_name": "Stationery Stores",
+      "image": "/stores/04-stationery.jpg",
+      "icon": "file",
+      "description": "Essential office supplies and work related instruments to ensure smooth and uninterrupted workflow",
+      "items": [
+        "Logbooks, navigation charts, and publications",
+        "Printer paper, pens, notebooks, and binders",
+        "Office stationery and filing essentials",
+        "Calculators and measuring instruments"
+      ]
+    },
+    {
+      "id": "bonded-stores",
+      "store_name": "Bonded Stores",
+      "image": "/stores/03-bonded.png",
+      "icon": "shield",
+      "description": "A wide range of duty-free goods, including electronics, spirits, and more for your convenience",
+      "items": [
+        "Duty-free spirits, beers, and wines",
+        "Tobacco and cigarettes",
+        "Duty-free electronics and gadgets",
+        "Confectionery, snacks, and personal care items"
+      ]
+    },
+    {
+      "id": "chemical-gases",
+      "store_name": "Chemical & Gases",
+      "image": "/stores/07-chemical.jpg",
+      "icon": "drop",
+      "description": "Specialized chemicals, industrial gases, and solutions for various applications",
+      "items": [
+        "Industrial gases (Oxygen, Acetylene, Nitrogen, Refrigerants)",
+        "Boiler and water treatment chemicals",
+        "Tank cleaning and cargo hold cleaning chemicals",
+        "Degreasers, solvents, and maintenance chemicals"
+      ]
+    }
+  ]
+}
