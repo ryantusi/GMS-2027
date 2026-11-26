@@ -24,8 +24,8 @@ import siteData from '../../content/site.json';
 
 interface NetworkPoseMetrics {
   gHeroX: number;
-  gBottomY: number;
   gShowcaseY: number;
+  gEntryOffsetY: number;
   gShowcaseScale: number;
   tHeroX: number;
   tHeroY: number;
@@ -35,18 +35,19 @@ interface NetworkPoseMetrics {
 /**
  * Section 9: Network (DESIGN.md Section 9)
  * - Theme: Clear global daylight (`--sea-salt`), text Deep Hull, `data-nav-theme="light"`.
- * - Scroll Choreography (Pinned):
- *   1. Light Sea Salt background establishes seamlessly out of Sectors.
- *   2. Large "Where we operate" title fades in top-center while a huge non-interactive, subtly auto-rotating
- *      3D globe rises cleanly from below the bottom line of the screen (without fading in).
- *   3. Continuing scroll shrinks and docks both elements smoothly into the asymmetric split layout:
- *      globe on the left (~55%), "Where we operate" + eyebrow + subtitle + search + continent accordions on the right (~45%).
- *   4. Once docked, the globe unlocks full interactivity (orbit drag, pointer tooltips, fly-to selection, live arcs).
+ * - Scroll Choreography:
+ *   1. Pre-pin entry (as Network scrolls into view behind Sectors): large "Where we operate" title
+ *      fades/rises in while the huge 3D globe rises smoothly into showcase position via inner wrappers.
+ *   2. Pinned docking: both elements hold briefly then shrink & dock smoothly into the asymmetric
+ *      split layout (globe left, title + eyebrow + subtitle + search + accordions right).
+ *   3. Once docked, the globe unlocks full interactivity (orbit drag, pointer tooltips, fly-to, live arcs).
  */
 export function Network() {
   const sectionRef = useRef<HTMLElement>(null);
   const globeStageRef = useRef<HTMLDivElement>(null);
+  const globeEntryRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const titleEntryRef = useRef<HTMLSpanElement>(null);
   const rightEyebrowRef = useRef<HTMLSpanElement>(null);
   const rightBodyRef = useRef<HTMLDivElement>(null);
   const listContainerRef = useRef<HTMLDivElement>(null);
@@ -60,7 +61,7 @@ export function Network() {
   const [reduceMotion, setReduceMotion] = useState(false);
   const [isGlobeInteractive, setIsGlobeInteractive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [openContinents, setOpenContinents] = useState<Record<string, boolean>>({});
+  const [openContinent, setOpenContinent] = useState<string | null>(null);
 
   const netCopy = siteData?.network_section;
 
@@ -83,16 +84,18 @@ export function Network() {
     return () => observer.disconnect();
   }, []);
 
-  // Pinned Scroll Choreography:
-  // Huge globe rises from bottom edge + "Where we operate" fades in centered -> shrinks & docks into split layout
+  // Scroll Choreography:
+  // Pre-pin entry on inner wrappers (no blank gap) -> Pinned shrink & dock on outer stage wrappers
   useGSAP(
     () => {
       const section = sectionRef.current;
       const globeEl = globeStageRef.current;
+      const globeEntryEl = globeEntryRef.current;
       const titleEl = titleRef.current;
+      const titleEntryEl = titleEntryRef.current;
       const eyebrowEl = rightEyebrowRef.current;
       const rightBodyEl = rightBodyRef.current;
-      if (!section || !globeEl || !titleEl) return;
+      if (!section || !globeEl || !globeEntryEl || !titleEl || !titleEntryEl) return;
 
       const mm = gsap.matchMedia();
 
@@ -108,10 +111,15 @@ export function Network() {
           if (rm) {
             interactiveStateRef.current = true;
             setIsGlobeInteractive(true);
-            gsap.set([globeEl, titleEl, eyebrowEl, rightBodyEl].filter(Boolean), {
-              clearProps: 'all',
-              autoAlpha: 1,
-            });
+            gsap.set(
+              [globeEl, globeEntryEl, titleEl, titleEntryEl, eyebrowEl, rightBodyEl].filter(
+                Boolean
+              ),
+              {
+                clearProps: 'all',
+                autoAlpha: 1,
+              }
+            );
             return;
           }
 
@@ -131,7 +139,7 @@ export function Network() {
             const tCenterX = tRect.left - sRect.left + tRect.width / 2;
             const tCenterY = tRect.top - sRect.top + tRect.height / 2;
 
-            // Showcase Globe: huge (almost entire screen width & height), starting at bottomline of screen
+            // Showcase Globe: large centered globe ready as Network enters view
             const showcaseDiameter = isDesktop
               ? Math.min(vw * 0.9, vh * 1.04)
               : Math.min(vw * 0.96, vh * 0.72);
@@ -142,12 +150,14 @@ export function Network() {
             const gHeroX = vw / 2 - gCenterX;
             const gRadius = (gRect.height * gShowcaseScale) / 2;
 
-            // Start cleanly just below bottom line of screen (y > vh) with zero fade-in; rise to showcase pose
             const gBottomY = vh + gRadius + 4 - gCenterY;
             const gTopTarget = isDesktop
               ? Math.max(195, vh * 0.23)
               : Math.max(165, vh * 0.21);
             const gShowcaseY = gTopTarget + gRadius - gCenterY;
+            const gEntryOffsetY =
+              Math.min(Math.max(0, gBottomY - gShowcaseY), vh * 0.38) /
+              Math.max(gShowcaseScale, 0.5);
 
             // Showcase Title: large centered headline over top, shrinking cleanly into docked right slot
             const tHeroScale = isDesktop
@@ -159,8 +169,8 @@ export function Network() {
 
             return {
               gHeroX,
-              gBottomY,
               gShowcaseY,
+              gEntryOffsetY,
               gShowcaseScale,
               tHeroX,
               tHeroY,
@@ -176,16 +186,20 @@ export function Network() {
           };
           ScrollTrigger.addEventListener('refreshInit', handleRefreshInit);
 
-          // Establish intro start frame: huge globe hidden below bottomline (no fade), big title faded out top-center
+          // Establish entry start frame: outer containers positioned in showcase frame,
+          // inner wrappers animate in as Network enters view (zero blank gap, zero tween overwrite)
           interactiveStateRef.current = false;
           setIsGlobeInteractive(false);
 
           gsap.set(globeEl, {
             x: pose.gHeroX,
-            y: pose.gBottomY,
+            y: pose.gShowcaseY,
             scale: pose.gShowcaseScale,
             transformOrigin: 'center center',
             autoAlpha: 1,
+          });
+          gsap.set(globeEntryEl, {
+            y: pose.gEntryOffsetY,
           });
           globeEl.style.setProperty(
             '--globe-pin-comp',
@@ -193,9 +207,13 @@ export function Network() {
           );
           gsap.set(titleEl, {
             x: pose.tHeroX,
-            y: pose.tHeroY + 20,
+            y: pose.tHeroY,
             scale: pose.tHeroScale,
             transformOrigin: 'center center',
+            autoAlpha: 1,
+          });
+          gsap.set(titleEntryEl, {
+            y: 18,
             autoAlpha: 0,
           });
           gsap.set([eyebrowEl, rightBodyEl].filter(Boolean), {
@@ -203,12 +221,41 @@ export function Network() {
             autoAlpha: 0,
           });
 
+          // Pre-pin entry timeline: Network title and globe rise visibly as soon as Network enters view
+          const entryTl = gsap.timeline({
+            scrollTrigger: {
+              trigger: section,
+              start: 'top 92%',
+              end: 'top top',
+              scrub: MOTION.scrub,
+              invalidateOnRefresh: true,
+              onEnter: () => {
+                setShouldMountGlobe(true);
+              },
+            },
+          });
+
+          entryTl.fromTo(
+            titleEntryEl,
+            { y: 18, autoAlpha: 0 },
+            { y: 0, autoAlpha: 1, ease: 'power2.out', duration: 0.55 },
+            0
+          );
+
+          entryTl.fromTo(
+            globeEntryEl,
+            { y: () => pose.gEntryOffsetY },
+            { y: 0, ease: 'power2.out', duration: 1 },
+            0
+          );
+
+          // Pinned split-docking timeline
           const tl = gsap.timeline({
             defaults: { ease: 'none' },
             scrollTrigger: {
               trigger: section,
               start: 'top top',
-              end: '+=155%',
+              end: '+=115%',
               pin: true,
               scrub: MOTION.scrub,
               invalidateOnRefresh: true,
@@ -228,7 +275,7 @@ export function Network() {
                   (1 / Math.max(currentScale, 0.5)).toFixed(3)
                 );
 
-                const docked = self.progress >= 0.78;
+                const docked = self.progress >= 0.72;
                 if (docked !== interactiveStateRef.current) {
                   interactiveStateRef.current = docked;
                   setIsGlobeInteractive(docked);
@@ -237,70 +284,42 @@ export function Network() {
             },
           });
 
-          // 0–22%: Big "Where we operate" title fades in smoothly at top center
-          tl.fromTo(
-            titleEl,
-            {
-              x: () => pose.tHeroX,
-              y: () => pose.tHeroY + 20,
-              scale: () => pose.tHeroScale,
-              autoAlpha: 0,
-            },
-            {
-              x: () => pose.tHeroX,
-              y: () => pose.tHeroY,
-              scale: () => pose.tHeroScale,
-              autoAlpha: 1,
-              duration: 22,
-              ease: 'power2.out',
-            },
-            0
-          );
-
-          // 0–36%: Huge globe rises up directly from bottom line of screen (no fade in)
+          // 0–15%: Brief showcase hold, then 15–68%: Globe shrinks & fits left; title shrinks & fits right
           tl.fromTo(
             globeEl,
-            {
-              x: () => pose.gHeroX,
-              y: () => pose.gBottomY,
-              scale: () => pose.gShowcaseScale,
-            },
             {
               x: () => pose.gHeroX,
               y: () => pose.gShowcaseY,
               scale: () => pose.gShowcaseScale,
-              duration: 36,
-              ease: 'power2.out',
             },
-            0
-          );
-
-          // 40–82%: Globe shrinks & fits left; title shrinks & fits right into final split layout
-          tl.to(
-            globeEl,
             {
               x: 0,
               y: 0,
               scale: 1,
-              duration: 42,
+              duration: 53,
               ease: 'power2.inOut',
             },
-            40
+            15
           );
 
-          tl.to(
+          tl.fromTo(
             titleEl,
             {
+              x: () => pose.tHeroX,
+              y: () => pose.tHeroY,
+              scale: () => pose.tHeroScale,
+            },
+            {
               x: 0,
               y: 0,
               scale: 1,
-              duration: 42,
+              duration: 53,
               ease: 'power2.inOut',
             },
-            40
+            15
           );
 
-          // 64–88%: Eyebrow, subtitle, search input, legend, and continent accordions reveal alongside docked title
+          // 50–86%: Eyebrow, subtitle, search input, legend, and continent accordions reveal alongside docked title
           const secondaryTargets = [eyebrowEl, rightBodyEl].filter(
             (el): el is HTMLSpanElement | HTMLDivElement => Boolean(el)
           );
@@ -310,11 +329,11 @@ export function Network() {
               {
                 autoAlpha: 1,
                 y: 0,
-                duration: 24,
-                stagger: 4,
+                duration: 36,
+                stagger: 5,
                 ease: 'power2.out',
               },
-              64
+              50
             );
           }
 
@@ -336,10 +355,7 @@ export function Network() {
     const node = NETWORK_DATA.byId.get(selectedCountryId);
     if (!node) return;
 
-    setOpenContinents((prev) => ({
-      ...prev,
-      [node.continent]: true,
-    }));
+    setOpenContinent(node.continent);
 
     const timer = window.setTimeout(() => {
       const rowEl = rowRefs.current[selectedCountryId];
@@ -401,16 +417,26 @@ export function Network() {
     }
   };
 
-  const toggleContinent = (continent: string) => {
-    setOpenContinents((prev) => ({
-      ...prev,
-      [continent]: !prev[continent],
-    }));
-  };
-
   const selectedNode: LocationNode | null = selectedCountryId
     ? NETWORK_DATA.byId.get(selectedCountryId) ?? null
     : null;
+
+  const toggleContinent = (continent: string) => {
+    const isCurrentlyOpen = openContinent === continent;
+
+    if (isCurrentlyOpen) {
+      setOpenContinent(null);
+      if (selectedNode && selectedNode.continent === continent) {
+        setSelectedCountryId(null);
+      }
+      return;
+    }
+
+    setOpenContinent(continent);
+    if (selectedNode && selectedNode.continent !== continent) {
+      setSelectedCountryId(null);
+    }
+  };
 
   const selectedServingOffice: LocationNode | null =
     selectedNode?.servingOfficeId
@@ -431,23 +457,25 @@ export function Network() {
             ref={globeStageRef}
             className="relative z-20 w-[78vw] max-w-[340px] sm:max-w-[440px] lg:w-full lg:max-w-[min(552px,68dvh)] xl:max-w-[min(560px,70dvh)] aspect-square flex items-center justify-center will-change-transform"
           >
-            {shouldMountGlobe ? (
-              <GlobeBase
-                selectedCountryId={selectedCountryId}
-                onSelectCountry={setSelectedCountryId}
-                reduceMotion={reduceMotion}
-                interactive={isGlobeInteractive}
-                className="w-full h-full"
-              />
-            ) : (
-              <MediaPlaceholder
-                label={netCopy?.title ?? ''}
-                icon="globe"
-                aspectRatio="1 / 1"
-                theme="dark"
-                className="rounded-full h-full w-full"
-              />
-            )}
+            <div ref={globeEntryRef} className="w-full h-full will-change-transform">
+              {shouldMountGlobe ? (
+                <GlobeBase
+                  selectedCountryId={selectedCountryId}
+                  onSelectCountry={setSelectedCountryId}
+                  reduceMotion={reduceMotion}
+                  interactive={isGlobeInteractive}
+                  className="w-full h-full"
+                />
+              ) : (
+                <MediaPlaceholder
+                  label={netCopy?.title ?? ''}
+                  icon="globe"
+                  aspectRatio="1 / 1"
+                  theme="dark"
+                  className="rounded-full h-full w-full"
+                />
+              )}
+            </div>
           </div>
 
           {/* Mobile Slide-Up Detail Card (shown once globe is docked and interactive) */}
@@ -512,7 +540,9 @@ export function Network() {
             ref={titleRef}
             className="relative z-30 inline-block w-fit font-display text-[length:var(--text-xl)] md:text-[clamp(2rem,2.9vw,2.9rem)] font-normal leading-[1.08] tracking-tight text-deep-hull whitespace-nowrap will-change-transform"
           >
-            {netCopy?.title ?? 'Worldwide Locations'}
+            <span ref={titleEntryRef} className="inline-block will-change-transform">
+              {netCopy?.title ?? 'Worldwide Locations'}
+            </span>
           </h2>
 
           <div
@@ -568,7 +598,7 @@ export function Network() {
                 filteredGroups.map((group) => {
                   const isExpanded =
                     Boolean(searchQuery.trim()) ||
-                    Boolean(openContinents[group.continent]);
+                    openContinent === group.continent;
 
                   return (
                     <div key={group.continent}>

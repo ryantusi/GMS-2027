@@ -352,27 +352,53 @@ export function Sectors() {
             scrollTrigger: {
               trigger: section,
               start: 'top top',
-              end: '+=200%',
+              end: '+=135%',
               pin: true,
               scrub: MOTION.scrub,
               invalidateOnRefresh: true,
+              onEnter: () => {
+                useAppStore.getState().setNavTheme('dark');
+                useAppStore.getState().setBottomTheme('dark');
+              },
+              onLeaveBack: () => {
+                useAppStore.getState().setNavTheme('light');
+                useAppStore.getState().setBottomTheme('light');
+              },
               onUpdate: (self) => {
-                if (self.progress > 0.06 && self.progress < 0.92) {
+                if (self.progress < 0.96) {
                   useAppStore.getState().setNavTheme('dark');
+                  useAppStore.getState().setBottomTheme('dark');
                 } else {
                   useAppStore.getState().setNavTheme('light');
+                  useAppStore.getState().setBottomTheme('light');
                 }
               },
             },
           });
 
-          // 0–10%: Sea Salt entry veil fades out from WhyUs
+          // Quick edge crossfade from WhyUs into Sectors as it enters the viewport (zero blank white gap)
           if (whiteEntryVeilRef.current) {
-            tl.fromTo(
+            gsap.fromTo(
               whiteEntryVeilRef.current,
               { opacity: 1 },
-              { opacity: 0, duration: 10, ease: 'power1.out' },
-              0
+              {
+                opacity: 0,
+                ease: 'power1.out',
+                scrollTrigger: {
+                  trigger: section,
+                  start: 'top 92%',
+                  end: 'top 50%',
+                  scrub: MOTION.scrub,
+                  onUpdate: (self) => {
+                    if (self.progress >= 0.55) {
+                      useAppStore.getState().setNavTheme('dark');
+                    } else {
+                      useAppStore.getState().setNavTheme('light');
+                    }
+                    useAppStore.getState().setBottomTheme(self.progress >= 0.3 ? 'dark' : 'light');
+                  },
+                },
+              }
             );
           }
 
@@ -386,9 +412,9 @@ export function Sectors() {
             );
           }
 
-          // 10–60%: Lower-ocean frosted cards reveal left-to-right and numbers count up
+          // 4–55%: Lower-ocean frosted cards reveal left-to-right and numbers count up
           sectors.forEach((s, idx) => {
-            const startAt = 10 + idx * 11;
+            const startAt = 4 + idx * 11;
             const card = cardRefs.current[idx];
             const proxy = countProxies[idx];
 
@@ -423,23 +449,31 @@ export function Sectors() {
             );
           });
 
-          // 60–90%: Golden-hour ambient glow deepens subtly
+          // 55–95%: Golden-hour ambient glow deepens subtly
           if (goldenWarmOverlayRef.current) {
             tl.fromTo(
               goldenWarmOverlayRef.current,
               { opacity: 0 },
-              { opacity: 0.28, duration: 28, ease: 'sine.inOut' },
-              60
+              { opacity: 0.28, duration: 40, ease: 'sine.inOut' },
+              55
             );
           }
 
-          // 90–100%: Transition out cleanly into Network's Sea Salt field
+          // Subtle Sea Salt edge dissolve only as Sectors unpins and scrolls out into Network
           if (daylightExitVeilRef.current) {
-            tl.fromTo(
+            gsap.fromTo(
               daylightExitVeilRef.current,
               { opacity: 0 },
-              { opacity: 1, duration: 10, ease: 'power1.inOut' },
-              90
+              {
+                opacity: 0.85,
+                ease: 'none',
+                scrollTrigger: {
+                  trigger: section,
+                  start: 'bottom 95%',
+                  end: 'bottom 25%',
+                  scrub: MOTION.scrub,
+                },
+              }
             );
           }
         }
@@ -599,14 +633,14 @@ export function Sectors() {
         </div>
       </div>
 
-      {/* Transition In Veil (Fade through Sea Salt white from WhyUs) */}
+      {/* Quick Edge Crossfade Entry Veil from WhyUs */}
       <div
         ref={whiteEntryVeilRef}
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 z-30 bg-sea-salt opacity-0"
       />
 
-      {/* Transition Out Veil (Golden hour dissolves into Network's clear Sea Salt daylight) */}
+      {/* Soft Exit Veil as Sectors Unpins into Network */}
       <div
         ref={daylightExitVeilRef}
         aria-hidden="true"

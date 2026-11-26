@@ -20,21 +20,60 @@ import siteData from '../../content/site.json';
 type SubmitState = 'idle' | 'sending' | 'sent' | 'error';
 
 interface FormValues {
-  name: string;
-  company: string;
   email: string;
-  phone: string;
+  subject: string;
   message: string;
   honeypot: string;
 }
 
 interface FormErrors {
-  name?: string;
-  company?: string;
   email?: string;
-  phone?: string;
+  subject?: string;
   message?: string;
   attachment?: string;
+}
+
+/** Custom phone-integrated-with-globe SVG icon matching Contact channel badge proportions */
+function InternationalPhoneIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 256 256"
+      fill="none"
+      aria-hidden="true"
+    >
+      {/* Phone handset on the left */}
+      <path
+        d="M62 44C46 46 36 60 32 82C26 114 26 144 34 176C40 200 54 214 70 214C77 214 84 210 86 202L90 184C92 176 88 168 80 165L68 160C63 158 60 153 59 147C57 134 57 120 59 107C60 101 63 96 68 94L80 89C88 86 91 78 89 70L85 52C83 45 73 43 62 44Z"
+        fill="currentColor"
+      />
+      {/* Globe outer arc (open toward handset on left) */}
+      <path
+        d="M108 66A74 74 0 1 1 114 194"
+        stroke="currentColor"
+        strokeWidth="12"
+        strokeLinecap="round"
+      />
+      {/* Latitude & longitude grid lines */}
+      <path
+        d="M148 54V202M144 54Q112 128 144 202M152 54Q192 128 152 202M100 128H222M104 88Q152 98 214 88M106 168Q152 158 214 168"
+        stroke="currentColor"
+        strokeWidth="10"
+        strokeLinecap="round"
+      />
+      {/* Stylized eastern hemisphere continents */}
+      <path
+        d="M176 98C176 86 190 76 206 78C212 84 214 96 204 104C194 106 182 106 176 98Z"
+        fill="currentColor"
+      />
+      <path
+        d="M164 126C172 114 192 114 204 124C214 132 214 146 204 156C196 164 194 178 184 180C176 180 174 166 170 156C160 148 158 134 164 126Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
 }
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -69,7 +108,7 @@ export function Contact() {
   const submitBtnRef = useRef<HTMLButtonElement>(null);
   const checkPathRef = useRef<SVGPathElement>(null);
 
-  const nameInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const prefilledStoreEnquiry = useAppStore((s) => s.prefilledStoreEnquiry);
@@ -78,10 +117,8 @@ export function Contact() {
 
   const [reduceMotion, setReduceMotion] = useState(false);
   const [values, setValues] = useState<FormValues>({
-    name: '',
-    company: '',
     email: '',
-    phone: '',
+    subject: '',
     message: '',
     honeypot: '',
   });
@@ -99,6 +136,7 @@ export function Contact() {
   const officesInfo = siteData?.contact_and_offices;
   const emails = officesInfo?.emails ?? [];
   const phones = officesInfo?.phones ?? [];
+  const internationalLine = officesInfo?.international_line ?? '+1 945 9972408';
   const headOffice = officesInfo?.head_office;
   const opsEmail = emails[0] ?? 'info@globalmarinesupplies.com';
   const loopVideoUrl = mediaCopy?.loop_video ?? '/contact/contact.mp4';
@@ -132,19 +170,20 @@ export function Contact() {
     }
   }, [reduceMotion]);
 
-  // Pre-fill message and focus Name when visitor arrives from a Store's "Request" button
+  // Pre-fill subject and message and focus Email when visitor arrives from a Store's "Request" button
   useEffect(() => {
     if (!prefilledStoreEnquiry) return;
 
     setValues((prev) => ({
       ...prev,
+      subject: prev.subject ? prev.subject : `Enquiry: ${prefilledStoreEnquiry}`,
       message: prev.message
         ? prev.message
         : `Enquiry for ${prefilledStoreEnquiry} — Port of call & ETA: `,
     }));
 
     window.setTimeout(() => {
-      nameInputRef.current?.focus();
+      emailInputRef.current?.focus();
     }, 150);
 
     setPrefilledStoreEnquiry(null);
@@ -171,19 +210,12 @@ export function Contact() {
   // Field validation logic
   const validateField = (field: keyof FormValues, val: string): string | undefined => {
     const trimmed = val.trim();
-    if (field === 'name') {
-      return trimmed.length < 2 ? fieldsCopy?.name_error : undefined;
-    }
-    if (field === 'company') {
-      return trimmed.length < 2 ? fieldsCopy?.company_error : undefined;
-    }
     if (field === 'email') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
       return !emailRegex.test(trimmed) ? fieldsCopy?.email_error : undefined;
     }
-    if (field === 'phone') {
-      const digitsOnly = trimmed.replace(/\D/g, '');
-      return digitsOnly.length < 7 ? fieldsCopy?.phone_error : undefined;
+    if (field === 'subject') {
+      return trimmed.length < 2 ? fieldsCopy?.subject_error : undefined;
     }
     if (field === 'message') {
       return trimmed.length < 6 ? fieldsCopy?.message_error : undefined;
@@ -268,19 +300,15 @@ export function Contact() {
     if (values.honeypot) return;
 
     const newErrors: FormErrors = {
-      name: validateField('name', values.name),
-      company: validateField('company', values.company),
       email: validateField('email', values.email),
-      phone: validateField('phone', values.phone),
+      subject: validateField('subject', values.subject),
       message: validateField('message', values.message),
       attachment: errors.attachment,
     };
 
     setTouched({
-      name: true,
-      company: true,
       email: true,
-      phone: true,
+      subject: true,
       message: true,
     });
     setErrors(newErrors);
@@ -298,10 +326,8 @@ export function Contact() {
     try {
       if (endpoint) {
         const formData = new FormData();
-        formData.append('name', values.name);
-        formData.append('company', values.company);
         formData.append('email', values.email);
-        formData.append('phone', values.phone);
+        formData.append('subject', values.subject);
         formData.append('message', values.message);
         if (attachment) {
           formData.append('attachment', attachment);
@@ -328,10 +354,8 @@ export function Contact() {
 
   const handleResetEnquiry = () => {
     setValues({
-      name: '',
-      company: '',
       email: '',
-      phone: '',
+      subject: '',
       message: '',
       honeypot: '',
     });
@@ -361,7 +385,7 @@ export function Contact() {
             </p>
 
             {/* Structured Contact Channels */}
-            <div className="mt-6 space-y-4">
+            <div className="mt-5 space-y-3.5">
               {/* 1. Office Address */}
               <div className="flex items-start gap-3.5">
                 <span
@@ -415,7 +439,30 @@ export function Contact() {
                 </div>
               </div>
 
-              {/* 3. Email Addresses */}
+              {/* 3. International Line */}
+              <div className="flex items-start gap-3.5">
+                <span
+                  aria-hidden="true"
+                  className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] bg-deep-hull text-sea-salt shadow-hull"
+                >
+                  <InternationalPhoneIcon size={20} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-sans text-[13.5px] font-semibold text-deep-hull">
+                    {bandCopy?.international_title ?? 'International Line'}
+                  </h3>
+                  <div className="mt-1">
+                    <a
+                      href={`tel:${internationalLine.replace(/\s+/g, '')}`}
+                      className="font-sans text-[13.5px] tabular-nums text-deep-hull/80 transition-colors duration-300 ease-out hover:text-[#00A9CE]"
+                    >
+                      {internationalLine}
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4. Email Addresses */}
               <div className="flex items-start gap-3.5">
                 <span
                   aria-hidden="true"
@@ -444,7 +491,7 @@ export function Contact() {
           </div>
 
           {/* Bottom-Left Looping Video Frame with Subtle Black Tint & Centered Contact List CTA */}
-          <div className="relative h-[168px] sm:h-[188px] lg:flex-1 lg:min-h-[168px] lg:max-h-[212px] w-full overflow-hidden rounded-[18px] bg-deep-hull border border-deep-hull/10 shadow-hull">
+          <div className="relative h-[160px] sm:h-[176px] lg:flex-1 lg:min-h-[144px] lg:max-h-[196px] w-full overflow-hidden rounded-[18px] bg-deep-hull border border-deep-hull/10 shadow-hull">
             <video
               ref={videoRef}
               src={loopVideoUrl}
@@ -506,153 +553,79 @@ export function Contact() {
                 />
               </div>
 
-              {/* Row 1: Name + Company or Vessel */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label
-                    htmlFor="contact-name"
-                    className="block font-sans text-[12px] font-medium text-deep-hull/80 mb-1"
+              {/* Row 1: Email */}
+              <div>
+                <label
+                  htmlFor="contact-email"
+                  className="block font-sans text-[12px] font-medium text-deep-hull/80 mb-1"
+                >
+                  {fieldsCopy?.email_label}
+                </label>
+                <input
+                  ref={emailInputRef}
+                  id="contact-email"
+                  type="email"
+                  required
+                  value={values.email}
+                  onChange={(e) => handleFieldChange('email', e.target.value)}
+                  onBlur={() => handleFieldBlur('email')}
+                  placeholder={fieldsCopy?.email_placeholder}
+                  aria-invalid={Boolean(errors.email)}
+                  aria-describedby={
+                    errors.email ? 'contact-email-error' : undefined
+                  }
+                  className={`w-full rounded-[10px] border bg-sea-salt/70 px-3 py-2 font-sans text-[13.5px] text-deep-hull placeholder:text-deep-hull/40 transition-colors duration-200 focus:bg-white ${
+                    errors.email
+                      ? 'border-red-600'
+                      : 'border-harbour-mist focus:border-signal-blue'
+                  }`}
+                />
+                {errors.email && (
+                  <p
+                    id="contact-email-error"
+                    role="alert"
+                    className="mt-0.5 text-[11px] leading-tight text-red-700"
                   >
-                    {fieldsCopy?.name_label}
-                  </label>
-                  <input
-                    ref={nameInputRef}
-                    id="contact-name"
-                    type="text"
-                    required
-                    value={values.name}
-                    onChange={(e) => handleFieldChange('name', e.target.value)}
-                    onBlur={() => handleFieldBlur('name')}
-                    placeholder={fieldsCopy?.name_placeholder}
-                    aria-invalid={Boolean(errors.name)}
-                    aria-describedby={errors.name ? 'contact-name-error' : undefined}
-                    className={`w-full rounded-[10px] border bg-sea-salt/70 px-3 py-2 font-sans text-[13.5px] text-deep-hull placeholder:text-deep-hull/40 transition-colors duration-200 focus:bg-white ${
-                      errors.name
-                        ? 'border-red-600'
-                        : 'border-harbour-mist focus:border-signal-blue'
-                    }`}
-                  />
-                  {errors.name && (
-                    <p
-                      id="contact-name-error"
-                      role="alert"
-                      className="mt-0.5 text-[11px] leading-tight text-red-700"
-                    >
-                      {errors.name}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="contact-company"
-                    className="block font-sans text-[12px] font-medium text-deep-hull/80 mb-1"
-                  >
-                    {fieldsCopy?.company_label}
-                  </label>
-                  <input
-                    id="contact-company"
-                    type="text"
-                    required
-                    value={values.company}
-                    onChange={(e) => handleFieldChange('company', e.target.value)}
-                    onBlur={() => handleFieldBlur('company')}
-                    placeholder={fieldsCopy?.company_placeholder}
-                    aria-invalid={Boolean(errors.company)}
-                    aria-describedby={
-                      errors.company ? 'contact-company-error' : undefined
-                    }
-                    className={`w-full rounded-[10px] border bg-sea-salt/70 px-3 py-2 font-sans text-[13.5px] text-deep-hull placeholder:text-deep-hull/40 transition-colors duration-200 focus:bg-white ${
-                      errors.company
-                        ? 'border-red-600'
-                        : 'border-harbour-mist focus:border-signal-blue'
-                    }`}
-                  />
-                  {errors.company && (
-                    <p
-                      id="contact-company-error"
-                      role="alert"
-                      className="mt-0.5 text-[11px] leading-tight text-red-700"
-                    >
-                      {errors.company}
-                    </p>
-                  )}
-                </div>
+                    {errors.email}
+                  </p>
+                )}
               </div>
 
-              {/* Row 2: Email + Phone */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label
-                    htmlFor="contact-email"
-                    className="block font-sans text-[12px] font-medium text-deep-hull/80 mb-1"
+              {/* Row 2: Subject */}
+              <div>
+                <label
+                  htmlFor="contact-subject"
+                  className="block font-sans text-[12px] font-medium text-deep-hull/80 mb-1"
+                >
+                  {fieldsCopy?.subject_label ?? 'Subject'}
+                </label>
+                <input
+                  id="contact-subject"
+                  type="text"
+                  required
+                  value={values.subject}
+                  onChange={(e) => handleFieldChange('subject', e.target.value)}
+                  onBlur={() => handleFieldBlur('subject')}
+                  placeholder={fieldsCopy?.subject_placeholder ?? 'Vessel name, IMO, or enquiry subject'}
+                  aria-invalid={Boolean(errors.subject)}
+                  aria-describedby={
+                    errors.subject ? 'contact-subject-error' : undefined
+                  }
+                  className={`w-full rounded-[10px] border bg-sea-salt/70 px-3 py-2 font-sans text-[13.5px] text-deep-hull placeholder:text-deep-hull/40 transition-colors duration-200 focus:bg-white ${
+                    errors.subject
+                      ? 'border-red-600'
+                      : 'border-harbour-mist focus:border-signal-blue'
+                  }`}
+                />
+                {errors.subject && (
+                  <p
+                    id="contact-subject-error"
+                    role="alert"
+                    className="mt-0.5 text-[11px] leading-tight text-red-700"
                   >
-                    {fieldsCopy?.email_label}
-                  </label>
-                  <input
-                    id="contact-email"
-                    type="email"
-                    required
-                    value={values.email}
-                    onChange={(e) => handleFieldChange('email', e.target.value)}
-                    onBlur={() => handleFieldBlur('email')}
-                    placeholder={fieldsCopy?.email_placeholder}
-                    aria-invalid={Boolean(errors.email)}
-                    aria-describedby={
-                      errors.email ? 'contact-email-error' : undefined
-                    }
-                    className={`w-full rounded-[10px] border bg-sea-salt/70 px-3 py-2 font-sans text-[13.5px] text-deep-hull placeholder:text-deep-hull/40 transition-colors duration-200 focus:bg-white ${
-                      errors.email
-                        ? 'border-red-600'
-                        : 'border-harbour-mist focus:border-signal-blue'
-                    }`}
-                  />
-                  {errors.email && (
-                    <p
-                      id="contact-email-error"
-                      role="alert"
-                      className="mt-0.5 text-[11px] leading-tight text-red-700"
-                    >
-                      {errors.email}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="contact-phone"
-                    className="block font-sans text-[12px] font-medium text-deep-hull/80 mb-1"
-                  >
-                    {fieldsCopy?.phone_label}
-                  </label>
-                  <input
-                    id="contact-phone"
-                    type="tel"
-                    required
-                    value={values.phone}
-                    onChange={(e) => handleFieldChange('phone', e.target.value)}
-                    onBlur={() => handleFieldBlur('phone')}
-                    placeholder={fieldsCopy?.phone_placeholder}
-                    aria-invalid={Boolean(errors.phone)}
-                    aria-describedby={
-                      errors.phone ? 'contact-phone-error' : undefined
-                    }
-                    className={`w-full rounded-[10px] border bg-sea-salt/70 px-3 py-2 font-sans text-[13.5px] text-deep-hull tabular-nums placeholder:text-deep-hull/40 transition-colors duration-200 focus:bg-white ${
-                      errors.phone
-                        ? 'border-red-600'
-                        : 'border-harbour-mist focus:border-signal-blue'
-                    }`}
-                  />
-                  {errors.phone && (
-                    <p
-                      id="contact-phone-error"
-                      role="alert"
-                      className="mt-0.5 text-[11px] leading-tight text-red-700"
-                    >
-                      {errors.phone}
-                    </p>
-                  )}
-                </div>
+                    {errors.subject}
+                  </p>
+                )}
               </div>
 
               {/* Row 3: Message / RFQ Details — expands to fill card height and match left column */}
@@ -829,17 +802,6 @@ export function Contact() {
                 </div>
               )}
             </form>
-
-            {/* Quiet Requisition Note */}
-            <p className="mt-3.5 pt-3 border-t border-harbour-mist/70 font-sans text-[12px] text-deep-hull/60 text-center">
-              {submitCopy?.requisition_note}{' '}
-              <a
-                href={`mailto:${opsEmail}`}
-                className="font-medium text-signal-blue transition-colors duration-300 ease-out hover:text-[#00A9CE]"
-              >
-                {opsEmail}
-              </a>
-            </p>
           </div>
         </div>
       </div>

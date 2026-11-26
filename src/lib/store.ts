@@ -12,11 +12,12 @@ export type DialogType =
 const AUDIO_STORAGE_KEY = 'gms_audio_enabled';
 
 function getInitialAudioState(): boolean {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === 'undefined') return true;
   try {
-    return window.sessionStorage.getItem(AUDIO_STORAGE_KEY) === 'true';
+    const stored = window.sessionStorage.getItem(AUDIO_STORAGE_KEY);
+    return stored === null ? true : stored === 'true';
   } catch {
-    return false;
+    return true;
   }
 }
 
@@ -29,6 +30,7 @@ export interface AppState {
 
   /* Theme & Navigation */
   navTheme: NavTheme;
+  bottomTheme: NavTheme;
   activeSection: string;
   scrollProgress: number;
   isAudioEnabled: boolean;
@@ -50,6 +52,7 @@ export interface AppState {
   setPreloaded: (ready: boolean) => void;
   setLoadProgress: (progress: number) => void;
   setNavTheme: (theme: NavTheme) => void;
+  setBottomTheme: (theme: NavTheme) => void;
   setActiveSection: (section: string) => void;
   setScrollProgress: (progress: number) => void;
   toggleAudio: () => void;
@@ -78,6 +81,7 @@ export const useAppStore = create<AppState>((set) => ({
   debugMode: initialDebug,
 
   navTheme: 'light',
+  bottomTheme: 'light',
   activeSection: 'hero',
   scrollProgress: 0,
   isAudioEnabled: getInitialAudioState(),
@@ -96,6 +100,7 @@ export const useAppStore = create<AppState>((set) => ({
   setPreloaded: (ready) => set({ isPreloaded: ready }),
   setLoadProgress: (progress) => set({ loadProgress: progress }),
   setNavTheme: (theme) => set({ navTheme: theme }),
+  setBottomTheme: (theme) => set({ bottomTheme: theme }),
   setActiveSection: (section) => set({ activeSection: section }),
   setScrollProgress: (progress) => set({ scrollProgress: progress }),
   toggleAudio: () =>

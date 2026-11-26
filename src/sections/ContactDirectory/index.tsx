@@ -34,11 +34,12 @@ export function ContactDirectory() {
   const isHeroPinned = useAppStore((s) => s.isHeroPinned);
   const isContactVisible = useAppStore((s) => s.isContactVisible);
   const isMobileMenuOpen = useAppStore((s) => s.isMobileMenuOpen);
-  const navTheme = useAppStore((s) => s.navTheme);
+  const bottomTheme = useAppStore((s) => s.bottomTheme);
   const activeDialog = useAppStore((s) => s.activeDialog);
   const setActiveDialog = useAppStore((s) => s.setActiveDialog);
   const setSelectedCountryId = useAppStore((s) => s.setSelectedCountryId);
 
+  const isDark = bottomTheme === 'dark';
   const isOpen = activeDialog === 'directory';
 
   const dirCopy = siteData?.contact_directory;
@@ -118,9 +119,19 @@ export function ContactDirectory() {
           aria-label={pillLabel}
           aria-haspopup="dialog"
           aria-expanded={isOpen}
-          className="group flex h-[42px] items-center gap-2.5 rounded-full px-4 sm:px-4.5 font-sans text-xs sm:text-[13px] font-semibold tracking-wide shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl bg-white/20 hover:bg-white/30 border border-white/40 text-white transition-all duration-300 hover:border-sonar-cyan/70 hover:shadow-[0_8px_32px_rgba(3,197,236,0.3)] hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-sonar-cyan cursor-pointer"
+          className={`group flex h-[42px] items-center gap-2.5 rounded-full px-4 sm:px-4.5 font-sans text-xs sm:text-[13px] font-semibold tracking-wide backdrop-blur-xl border transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-2 cursor-pointer ${
+            isDark
+              ? 'bg-white/20 hover:bg-white/30 border-white/40 text-white shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:border-sonar-cyan/70 hover:shadow-[0_8px_32px_rgba(3,197,236,0.3)] focus-visible:outline-sonar-cyan'
+              : 'bg-deep-hull/90 hover:bg-signal-blue border-deep-hull/20 text-sea-salt shadow-[0_10px_28px_rgba(14,34,51,0.22)] hover:border-sonar-cyan/60 hover:shadow-[0_10px_30px_rgba(11,94,142,0.28)] focus-visible:outline-deep-teal'
+          }`}
         >
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 text-[#F3E5AB] group-hover:bg-sonar-cyan group-hover:text-night-port transition-colors shadow-inner">
+          <span
+            className={`flex h-6 w-6 items-center justify-center rounded-full transition-colors shadow-inner ${
+              isDark
+                ? 'bg-white/20 text-[#F3E5AB] group-hover:bg-sonar-cyan group-hover:text-night-port'
+                : 'bg-white/15 text-sonar-cyan group-hover:bg-sonar-cyan group-hover:text-night-port'
+            }`}
+          >
             <ChatCircleDots size={16} weight="duotone" />
           </span>
           <span className="whitespace-nowrap font-medium drop-shadow-sm">{pillLabel}</span>

@@ -519,17 +519,17 @@ export function GlobeBase({
     );
   }, [selectedCountryId, reduceMotion, interactive]);
 
-  // Subtle office pulse rings (active once globe is docked and interactive)
+  // Subtle gold office pulse rings (active once globe is docked and interactive)
   const officeRings = useMemo<GlobeRing[]>(() => {
     if (reduceMotion || !interactive) return [];
     return NETWORK_DATA.officeNodes.map((office) => ({
       id: `office-ring-${office.id}`,
       lat: office.latitude,
       lng: office.longitude,
-      maxR: 2.2,
+      maxR: 1.85,
       propagationSpeed: 0.85,
       repeatPeriod: 2100,
-      color: '#0B5E8E',
+      color: '#E5B53B',
     }));
   }, [reduceMotion, interactive]);
 
@@ -582,10 +582,10 @@ export function GlobeBase({
 
     if (isSelected) {
       pin.style.boxShadow =
-        '0 0 0 4.5px rgba(3, 197, 236, 0.48), 0 2px 8px rgba(8, 20, 32, 0.55)';
+        '0 0 0 3.5px rgba(245, 196, 81, 0.52), 0 2px 8px rgba(8, 20, 32, 0.55)';
     } else {
       pin.style.boxShadow =
-        '0 0 0 2.5px rgba(3, 197, 236, 0.28), 0 2px 5px rgba(8, 20, 32, 0.45)';
+        '0 0 0 2px rgba(229, 181, 59, 0.34), 0 1.5px 4px rgba(8, 20, 32, 0.45)';
     }
 
     const canShowTooltips = typeof window !== 'undefined' && window.innerWidth >= 768;
@@ -834,11 +834,12 @@ export function GlobeBase({
       pin.style.borderRadius = '9999px';
       pin.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
 
-      // Unified Signal Blue pin with refined sea-salt rim & subtle sonar halo
-      pin.style.width = '9.5px';
-      pin.style.height = '9.5px';
-      pin.style.backgroundColor = 'var(--signal-blue)';
-      pin.style.border = '1.5px solid rgba(245, 249, 251, 0.92)';
+      // Polished gold pin with refined warm rim & subtle gold halo
+      pin.style.width = '7.5px';
+      pin.style.height = '7.5px';
+      pin.style.background =
+        'radial-gradient(circle at 35% 35%, #F6D57A 0%, #DFAA2B 70%, #B88318 100%)';
+      pin.style.border = '1.25px solid rgba(255, 250, 235, 0.92)';
 
       pinHolder.appendChild(pin);
       wrapper.appendChild(pinHolder);
@@ -960,9 +961,9 @@ export function GlobeBase({
           ringRepeatPeriod="repeatPeriod"
           ringColor={(d: object) => (t: number) => {
             const c = (d as GlobeRing).color;
-            return c === '#03C5EC'
-              ? `rgba(3, 197, 236, ${1 - t})`
-              : `rgba(11, 94, 142, ${(1 - t) * 0.8})`;
+            return c === '#E5B53B'
+              ? `rgba(229, 181, 59, ${(1 - t) * 0.8})`
+              : `rgba(3, 197, 236, ${1 - t})`;
           }}
           /* Layer 3C: Horizon-Culled HTML Pointers & Pinned Tooltips */
           htmlElementsData={NETWORK_DATA.allNodes}

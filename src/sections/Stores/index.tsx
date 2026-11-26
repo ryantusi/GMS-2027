@@ -72,7 +72,7 @@ export function Stores() {
   const setSelectedStoreFilter = useAppStore((s) => s.setSelectedStoreFilter);
 
   const sectionCopy = storesData?.section;
-  const autoplaySeconds = sectionCopy?.autoplay_seconds ?? 5;
+  const autoplaySeconds = sectionCopy?.autoplay_seconds ?? 6;
 
   const stores: StoreEntry[] = useMemo(() => {
     const raw = storesData?.ship_supplies ?? [];
@@ -334,30 +334,21 @@ export function Stores() {
     };
   }, [startHoldCycle]);
 
-  // Select a store manually: switch immediately, pause autoplay briefly for 1s, then resume
+  // Select a store manually: switch immediately and restart autoplay with 0s delay
   const selectStoreManually = (idx: number) => {
+    if (resumeTimerRef.current !== null) {
+      window.clearTimeout(resumeTimerRef.current);
+      resumeTimerRef.current = null;
+    }
+
+    isPausedByUserRef.current = false;
+
     if (idx !== activeIndex) {
       setPreviousIndex(activeIndex);
       setActiveIndex(idx);
-    }
-
-    isPausedByUserRef.current = true;
-    holdTweenRef.current?.kill();
-
-    const bars = [progressLineRef.current, mobileProgressLineRef.current].filter(
-      Boolean
-    ) as HTMLElement[];
-    if (bars.length > 0) {
-      gsap.set(bars, { scaleX: 0, transformOrigin: 'left center' });
-    }
-
-    if (resumeTimerRef.current !== null) {
-      window.clearTimeout(resumeTimerRef.current);
-    }
-    resumeTimerRef.current = window.setTimeout(() => {
-      isPausedByUserRef.current = false;
+    } else {
       startHoldCycle();
-    }, 1000);
+    }
   };
 
   // Keyboard navigation for ARIA tablist

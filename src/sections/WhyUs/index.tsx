@@ -1,4 +1,6 @@
 import {
+  useCallback,
+  useEffect,
   useRef,
   useState,
   type ComponentType,
@@ -39,10 +41,13 @@ const ICON_MAP: Record<
   network: GlobeHemisphereWest,
 };
 
+const FLIP_HOLD_SECONDS = 6;
+
 interface WhyFlipTiltCardProps {
   item: WhyItem;
   isFlipped: boolean;
   onToggleFlip: () => void;
+  onFlipToFront: () => void;
   className?: string;
   maxTilt?: number;
 }
@@ -60,6 +65,7 @@ function WhyFlipTiltCard({
   item,
   isFlipped,
   onToggleFlip,
+  onFlipToFront,
   className = '',
   maxTilt = 4,
 }: WhyFlipTiltCardProps) {
@@ -69,6 +75,10 @@ function WhyFlipTiltCard({
   const backFaceRef = useRef<HTMLDivElement>(null);
   const frontGlareRef = useRef<HTMLDivElement>(null);
   const backGlareRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLSpanElement>(null);
+  const progressTweenRef = useRef<gsap.core.Tween | null>(null);
+  const onFlipToFrontRef = useRef(onFlipToFront);
+  onFlipToFrontRef.current = onFlipToFront;
 
   const IconComp = ICON_MAP[item.icon] ?? SealCheck;
   const isDarkVariant = item.variant === 'dark' || item.variant === 'blue';
@@ -114,6 +124,40 @@ function WhyFlipTiltCard({
     },
     { scope: tiltRef, dependencies: [isFlipped] }
   );
+
+  // Timed progress bar on back face: fills across FLIP_HOLD_SECONDS then flips card to front
+  useEffect(() => {
+    progressTweenRef.current?.kill();
+    const bar = progressBarRef.current;
+
+    if (!isFlipped) {
+      if (bar) {
+        gsap.set(bar, { scaleX: 0, transformOrigin: 'left center' });
+      }
+      return;
+    }
+
+    if (bar) {
+      gsap.set(bar, { scaleX: 0, transformOrigin: 'left center' });
+      progressTweenRef.current = gsap.to(bar, {
+        scaleX: 1,
+        duration: FLIP_HOLD_SECONDS,
+        ease: 'none',
+        onComplete: () => {
+          onFlipToFrontRef.current();
+        },
+      });
+    } else {
+      const timer = window.setTimeout(() => {
+        onFlipToFrontRef.current();
+      }, FLIP_HOLD_SECONDS * 1000);
+      return () => window.clearTimeout(timer);
+    }
+
+    return () => {
+      progressTweenRef.current?.kill();
+    };
+  }, [isFlipped]);
 
   const handlePointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (e.pointerType === 'touch') return;
@@ -291,7 +335,7 @@ function WhyFlipTiltCard({
               {item.description}
             </p>
 
-            <div className="flex items-center justify-start pt-1">
+            <div className="flex items-center justify-between gap-4 pt-1">
               <a
                 href={item.href}
                 tabIndex={isFlipped ? 0 : -1}
@@ -313,6 +357,21 @@ function WhyFlipTiltCard({
                   className="transition-transform duration-200 group-hover/btn:translate-x-0.5"
                 />
               </a>
+
+              {/* Timed progress bar matching Stores section on the bottom right */}
+              <span
+                aria-hidden="true"
+                className={`relative h-[2px] w-24 shrink-0 overflow-hidden rounded-full ${
+                  isDarkVariant ? 'bg-sea-salt/15' : 'bg-deep-hull/12'
+                }`}
+              >
+                <span
+                  ref={progressBarRef}
+                  className={`block h-full w-full origin-left ${
+                    isDarkVariant ? 'bg-sonar-cyan' : 'bg-signal-blue'
+                  }`}
+                />
+              </span>
             </div>
 
             <div
@@ -351,6 +410,16 @@ export function WhyUs() {
       [id]: !prev[id],
     }));
   };
+
+  const flipCardToFront = useCallback((id: string) => {
+    setFlippedMap((prev) => {
+      if (!prev[id]) return prev;
+      return {
+        ...prev,
+        [id]: false,
+      };
+    });
+  }, []);
 
   useGSAP(
     () => {
@@ -458,6 +527,7 @@ export function WhyUs() {
               item={item}
               isFlipped={Boolean(flippedMap[item.id])}
               onToggleFlip={() => toggleCardFlip(item.id)}
+              onFlipToFront={() => flipCardToFront(item.id)}
               maxTilt={4}
               className={getSpanClasses(item.span)}
             />

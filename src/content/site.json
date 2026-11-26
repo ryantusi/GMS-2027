@@ -10,8 +10,8 @@
       { "id": "about", "label": "About" },
       { "id": "stores", "label": "Stores" },
       { "id": "services", "label": "Services" },
-      { "id": "sectors", "label": "Sectors" },
-      { "id": "network", "label": "Network" },
+      { "id": "why-us", "label": "Why Us" },
+      { "id": "network", "label": "Locations" },
       { "id": "contact", "label": "Contact" }
     ],
     "cta_label": "Request a quote",
@@ -56,18 +56,12 @@
     "form_title": "Send an enquiry",
     "form_endpoint": "",
     "fields": {
-      "name_label": "Name",
-      "name_placeholder": "Capt. / Purchasing Superintendent",
-      "name_error": "Enter your name so our desk knows who to address.",
-      "company_label": "Company or Vessel",
-      "company_placeholder": "Shipping company or vessel name / IMO",
-      "company_error": "Enter your company or vessel name.",
       "email_label": "Email",
       "email_placeholder": "name@company.com",
       "email_error": "Enter an email like name@company.com.",
-      "phone_label": "Phone",
-      "phone_placeholder": "+971 50 000 0000",
-      "phone_error": "Enter a valid phone number with country code (at least 7 digits).",
+      "subject_label": "Subject",
+      "subject_placeholder": "Vessel name, IMO, or enquiry subject",
+      "subject_error": "Enter a subject for your enquiry.",
       "message_label": "How can we help?",
       "message_placeholder": "Port of call, ETA, and store or service requirements...",
       "message_error": "Tell us briefly about your vessel's port call or requirements.",
@@ -88,6 +82,7 @@
     },
     "details_band": {
       "col1_title": "Phone Lines",
+      "international_title": "International Line",
       "whatsapp_label": "WhatsApp us",
       "whatsapp_url": "https://wa.me/971506990095",
       "col2_title": "Email Addresses",
@@ -107,7 +102,8 @@
   },
   "contact_and_offices": {
     "emails": ["info@globalmarinesupplies.com", "world@globalmarinesupplies.com", "info@globalmarinesupplies.ae"],
-    "phones": ["+971 506990095", "+971 508834050", "+1 945 9972408"],
+    "phones": ["+971 506990095", "+971 508834050"],
+    "international_line": "+1 945 9972408",
     "head_office": {
       "location_name": "Head Office",
       "address": "114 & 115, Commercial Bank of Dubai Building, 1st Floor, Sheikh Zayed Road, Al Quoz, UAE"

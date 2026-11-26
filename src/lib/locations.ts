@@ -183,7 +183,7 @@ function greatCircleDistance(
 }
 
 /**
- * Computes the local time string (HH:MM) at a given longitude
+ * Computes the local time string (h:mm AM/PM) at a given longitude
  * so every location card / tooltip shows accurate local time with tabular numerals.
  */
 export function getLocalTimeAtLongitude(longitude: number, now = new Date()): string {
@@ -195,9 +195,11 @@ export function getLocalTimeAtLongitude(longitude: number, now = new Date()): st
     offsetHours = 5.5;
   }
   const targetDate = new Date(utcMs + offsetHours * 3600000);
-  const hrs = String(targetDate.getHours()).padStart(2, '0');
+  const rawHours = targetDate.getHours();
+  const period = rawHours >= 12 ? 'PM' : 'AM';
+  const hrs12 = rawHours % 12 || 12;
   const mins = String(targetDate.getMinutes()).padStart(2, '0');
-  return `${hrs}:${mins}`;
+  return `${hrs12}:${mins} ${period}`;
 }
 
 /**
@@ -222,7 +224,9 @@ function buildNormalizedLocations(): {
   const defaultPhone =
     siteData?.contact_and_offices?.phones?.[0] ?? '+971 506990095';
   const usPhone =
-    siteData?.contact_and_offices?.phones?.[2] ?? defaultPhone;
+    siteData?.contact_and_offices?.international_line ??
+    siteData?.contact_and_offices?.phones?.[2] ??
+    defaultPhone;
   const defaultEmail =
     siteData?.contact_and_offices?.emails?.[0] ?? 'info@globalmarinesupplies.com';
 

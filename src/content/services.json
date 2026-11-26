@@ -22,7 +22,7 @@
     "items": [
       {
         "name": "Procurement of Ship Spares",
-        "icon": "cube",
+        "icon": "gear",
         "zone": "Forward Forecastle",
         "description": "Global OEM and class-certified spare part sourcing for deck machinery, valves and pumps.",
         "boxX": 9.2,
@@ -52,7 +52,7 @@
       },
       {
         "name": "Agency Services (at selected ports)",
-        "icon": "compass",
+        "icon": "handshake",
         "zone": "Bridge & Navigation",
         "description": "Full port clearance, husbandry, crew change logistics and port authority coordination.",
         "boxX": 70,
@@ -62,7 +62,7 @@
       },
       {
         "name": "Cash to Master",
-        "icon": "shield",
+        "icon": "cash",
         "zone": "Master's Cabin",
         "description": "Secure, insured onboard USD cash delivery directly to the Master with full port compliance.",
         "boxX": 91,
@@ -72,7 +72,7 @@
       },
       {
         "name": "Waste and Garbage Disposal",
-        "icon": "lifebuoy",
+        "icon": "trash",
         "zone": "MARPOL Reception",
         "description": "Certified MARPOL Annex I–V sludge, bilge water and segregated garbage barge reception.",
         "boxX": 27,
@@ -92,7 +92,7 @@
       },
       {
         "name": "Motor Rewinding",
-        "icon": "lightning",
+        "icon": "engine",
         "zone": "Engine Room",
         "description": "Rapid shore-workshop and voyage rewinding, dynamic balancing and varnish curing for marine motors.",
         "boxX": 70,

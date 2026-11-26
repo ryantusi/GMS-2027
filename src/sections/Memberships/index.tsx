@@ -7,7 +7,6 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   type TouchEvent as ReactTouchEvent,
-  type WheelEvent as ReactWheelEvent,
 } from 'react';
 import {
   Anchor,
@@ -27,6 +26,7 @@ import siteData from '../../content/site.json';
 
 interface CertificateItem {
   name: string;
+  logo?: string;
   standard?: string;
   issuer?: string;
   status?: string;
@@ -67,16 +67,22 @@ export function Memberships() {
 
   // Continuous floating-point wheel index (e.g. 0.0, 1.0, 2.35, -1.0...)
   const wheelPosObj = useRef({ value: 0 });
+  const targetPosRef = useRef(0);
   const activeStepTween = useRef<gsap.core.Tween | null>(null);
   const isSectionInViewRef = useRef(false);
   const isPageVisibleRef = useRef(true);
-  const isInteractingRef = useRef(false);
+  const isHoveredRef = useRef(false);
+  const isFocusedRef = useRef(false);
   const idleResumeTimerRef = useRef<number | null>(null);
   const autoscrollTimerRef = useRef<number | null>(null);
+  const wheelAccumRef = useRef(0);
+  const wheelAccumResetTimerRef = useRef<number | null>(null);
 
   // Drag state
   const dragStateRef = useRef<{
     active: boolean;
+    pointerId: number | null;
+    captured: boolean;
     startY: number;
     startValue: number;
     lastY: number;
@@ -85,6 +91,8 @@ export function Memberships() {
     moved: boolean;
   }>({
     active: false,
+    pointerId: null,
+    captured: false,
     startY: 0,
     startValue: 0,
     lastY: 0,
@@ -95,6 +103,7 @@ export function Memberships() {
 
   // React state for rendered virtual wheel rows & Certificate Viewer Dialog
   const [wheelValue, setWheelValue] = useState(0);
+  const [hoveredSlot, setHoveredSlot] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const [triggerEl, setTriggerEl] = useState<HTMLElement | null>(null);
@@ -173,48 +182,61 @@ export function Memberships() {
     }
   }, []);
 
-  const startAutoscrollIfEligible = useCallback(() => {
-    clearAutoscroll();
-    if (itemCount === 0) return;
-
+  const canAutoscroll = useCallback(() => {
     const prefersReducedMotion =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    if (
-      prefersReducedMotion ||
-      !isSectionInViewRef.current ||
-      !isPageVisibleRef.current ||
-      isInteractingRef.current ||
-      viewerIndex !== null
-    ) {
-      return;
-    }
+    return (
+      itemCount > 0 &&
+      !prefersReducedMotion &&
+      isSectionInViewRef.current &&
+      isPageVisibleRef.current &&
+      !isHoveredRef.current &&
+      !isFocusedRef.current &&
+      !dragStateRef.current.active &&
+      viewerIndex === null
+    );
+  }, [itemCount, viewerIndex]);
 
-    autoscrollTimerRef.current = window.setInterval(() => {
-      if (
-        !isSectionInViewRef.current ||
-        !isPageVisibleRef.current ||
-        isInteractingRef.current ||
-        viewerIndex !== null
-      ) {
+  const stepAutoscrollForward = useCallback(() => {
+    if (!canAutoscroll()) return;
+    const nextInt = Math.round(wheelPosObj.current.value) + 1;
+    targetPosRef.current = nextInt;
+    animateWheelTo(nextInt, 0.72, 'power3.inOut');
+  }, [animateWheelTo, canAutoscroll]);
+
+  const startAutoscrollIfEligible = useCallback(
+    (immediate = false) => {
+      clearAutoscroll();
+      if (!canAutoscroll()) {
         return;
       }
-      const nextInt = Math.round(wheelPosObj.current.value) + 1;
-      animateWheelTo(nextInt, 0.75, 'power3.inOut');
-    }, 2800);
-  }, [animateWheelTo, clearAutoscroll, itemCount, viewerIndex]);
+
+      if (immediate) {
+        stepAutoscrollForward();
+      }
+
+      autoscrollTimerRef.current = window.setInterval(() => {
+        stepAutoscrollForward();
+      }, 2800);
+    },
+    [canAutoscroll, clearAutoscroll, stepAutoscrollForward]
+  );
 
   const markUserInteraction = useCallback(() => {
-    isInteractingRef.current = true;
     clearAutoscroll();
     if (idleResumeTimerRef.current !== null) {
       window.clearTimeout(idleResumeTimerRef.current);
+      idleResumeTimerRef.current = null;
     }
-    idleResumeTimerRef.current = window.setTimeout(() => {
-      isInteractingRef.current = false;
-      startAutoscrollIfEligible();
-    }, 5000);
+    if (!isHoveredRef.current) {
+      idleResumeTimerRef.current = window.setTimeout(() => {
+        if (!isHoveredRef.current && !dragStateRef.current.active) {
+          startAutoscrollIfEligible(true);
+        }
+      }, 1400);
+    }
   }, [clearAutoscroll, startAutoscrollIfEligible]);
 
   // IntersectionObserver & visibilitychange so wheel only autoscrolls while visible
@@ -263,9 +285,82 @@ export function Memberships() {
       clearAutoscroll();
     } else {
       setIsZoomed(false);
-      startAutoscrollIfEligible();
+      startAutoscrollIfEligible(false);
     }
   }, [viewerIndex, clearAutoscroll, startAutoscrollIfEligible]);
+
+  // Native non-passive wheel listener on the wheel container so scrolling it never scrolls the page
+  useEffect(() => {
+    const el = wheelViewportRef.current;
+    if (!el) return;
+
+    const onNativeWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (itemCount === 0 || viewerIndex !== null) return;
+
+      clearAutoscroll();
+      if (idleResumeTimerRef.current !== null) {
+        window.clearTimeout(idleResumeTimerRef.current);
+        idleResumeTimerRef.current = null;
+      }
+
+      if (!isHoveredRef.current) {
+        idleResumeTimerRef.current = window.setTimeout(() => {
+          if (!isHoveredRef.current && !dragStateRef.current.active) {
+            startAutoscrollIfEligible(true);
+          }
+        }, 900);
+      }
+
+      if (Math.abs(e.deltaY) < 0.5) return;
+
+      if (
+        wheelAccumRef.current !== 0 &&
+        Math.sign(e.deltaY) !== Math.sign(wheelAccumRef.current)
+      ) {
+        wheelAccumRef.current = 0;
+      }
+
+      wheelAccumRef.current += e.deltaY;
+
+      if (wheelAccumResetTimerRef.current !== null) {
+        window.clearTimeout(wheelAccumResetTimerRef.current);
+      }
+      wheelAccumResetTimerRef.current = window.setTimeout(() => {
+        wheelAccumRef.current = 0;
+      }, 160);
+
+      const STEP_PX = 56;
+      if (Math.abs(wheelAccumRef.current) >= STEP_PX) {
+        const rawSteps = Math.trunc(wheelAccumRef.current / STEP_PX);
+        const isDiscreteNotch = Math.abs(e.deltaY) >= 80 && Math.abs(rawSteps) <= 2;
+        const steps = isDiscreteNotch
+          ? Math.sign(e.deltaY)
+          : Math.max(-2, Math.min(2, rawSteps));
+
+        wheelAccumRef.current = isDiscreteNotch
+          ? 0
+          : wheelAccumRef.current - rawSteps * STEP_PX;
+
+        const baseTarget = activeStepTween.current?.isActive()
+          ? targetPosRef.current
+          : Math.round(wheelPosObj.current.value);
+        const nextTarget = baseTarget + steps;
+        targetPosRef.current = nextTarget;
+        animateWheelTo(nextTarget, 0.42, 'power3.out');
+      }
+    };
+
+    el.addEventListener('wheel', onNativeWheel, { passive: false });
+    return () => {
+      el.removeEventListener('wheel', onNativeWheel);
+      if (wheelAccumResetTimerRef.current !== null) {
+        window.clearTimeout(wheelAccumResetTimerRef.current);
+      }
+    };
+  }, [animateWheelTo, clearAutoscroll, itemCount, startAutoscrollIfEligible, viewerIndex]);
 
   // Left / Right arrow keys inside Certificate Viewer Dialog
   useEffect(() => {
@@ -423,10 +518,12 @@ export function Memberships() {
                     section.setAttribute('data-nav-theme', nextTheme);
                     useAppStore.getState().setNavTheme(nextTheme);
                   }
+                  useAppStore.getState().setBottomTheme(self.progress >= 0.35 ? 'dark' : 'light');
                 },
                 onLeaveBack: () => {
                   section.setAttribute('data-nav-theme', 'light');
                   useAppStore.getState().setNavTheme('light');
+                  useAppStore.getState().setBottomTheme('light');
                 },
               },
             }
@@ -450,6 +547,8 @@ export function Memberships() {
     activeStepTween.current?.kill();
     dragStateRef.current = {
       active: true,
+      pointerId: e.pointerId,
+      captured: false,
       startY: e.clientY,
       startValue: wheelPosObj.current.value,
       lastY: e.clientY,
@@ -466,6 +565,14 @@ export function Memberships() {
     const dy = e.clientY - st.startY;
     if (Math.abs(dy) > 5) {
       st.moved = true;
+      if (!st.captured && st.pointerId !== null) {
+        try {
+          e.currentTarget.setPointerCapture(st.pointerId);
+          st.captured = true;
+        } catch {
+          // Ignore if pointer capture is unavailable
+        }
+      }
     }
 
     const now = performance.now();
@@ -477,27 +584,36 @@ export function Memberships() {
     // Dragging upward (negative dy) advances the wheel forward (+value)
     const nextVal = st.startValue - dy / rowSpacing;
     wheelPosObj.current.value = nextVal;
+    targetPosRef.current = Math.round(nextVal);
     setWheelValue(nextVal);
   };
 
-  const handlePointerUpOrCancel = () => {
+  const handlePointerUpOrCancel = (e: ReactPointerEvent<HTMLDivElement>) => {
     const st = dragStateRef.current;
     if (!st.active) return;
     st.active = false;
 
+    if (st.captured && st.pointerId !== null) {
+      try {
+        if (e.currentTarget.hasPointerCapture(st.pointerId)) {
+          e.currentTarget.releasePointerCapture(st.pointerId);
+        }
+      } catch {
+        // Ignore if pointer capture already released
+      }
+    }
+    st.captured = false;
+    st.pointerId = null;
+
     // Apply inertia from release velocity and snap to nearest integer slot
     const inertiaItems = (-st.velocity * 140) / rowSpacing;
     const snapped = Math.round(wheelPosObj.current.value + inertiaItems);
+    targetPosRef.current = snapped;
     animateWheelTo(snapped, 0.55, 'power3.out');
-  };
 
-  // Wheel handler inside the dial
-  const handleWheel = (e: ReactWheelEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-    markUserInteraction();
-    const deltaItems = Math.sign(e.deltaY) * Math.min(1.5, Math.max(0.35, Math.abs(e.deltaY) / 90));
-    const snapped = Math.round(wheelPosObj.current.value + deltaItems);
-    animateWheelTo(snapped, 0.45, 'power3.out');
+    if (!isHoveredRef.current && !isFocusedRef.current) {
+      startAutoscrollIfEligible(false);
+    }
   };
 
   // Keyboard Up/Down arrow navigation on the wheel
@@ -505,11 +621,15 @@ export function Memberships() {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       markUserInteraction();
-      animateWheelTo(Math.round(wheelPosObj.current.value) + 1, 0.45, 'power3.out');
+      const next = Math.round(wheelPosObj.current.value) + 1;
+      targetPosRef.current = next;
+      animateWheelTo(next, 0.45, 'power3.out');
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       markUserInteraction();
-      animateWheelTo(Math.round(wheelPosObj.current.value) - 1, 0.45, 'power3.out');
+      const next = Math.round(wheelPosObj.current.value) - 1;
+      targetPosRef.current = next;
+      animateWheelTo(next, 0.45, 'power3.out');
     } else if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       markUserInteraction();
@@ -529,6 +649,7 @@ export function Memberships() {
     if (offset !== 0) {
       // Snap clicked row into focal position and open its certificate viewer
       const targetVal = Math.round(wheelPosObj.current.value) + offset;
+      targetPosRef.current = targetVal;
       animateWheelTo(targetVal, 0.45, 'power3.out');
     }
     setTriggerEl(btnEl);
@@ -563,7 +684,7 @@ export function Memberships() {
         ref={contentWrapRef}
         className="relative z-10 mx-auto w-full max-w-7xl px-6 sm:px-10 md:px-12 lg:px-16"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-12 lg:gap-16 xl:gap-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-12 lg:gap-12 xl:gap-16">
           {/* Left Grid: Title, Blue Subtitle Below It, and Scroll-Illuminated Paragraph */}
           <div className="lg:col-span-5 flex flex-col items-start">
             <h2
@@ -583,7 +704,7 @@ export function Memberships() {
               <p
                 ref={missionRef}
                 aria-label={sectionCopy.subtitle}
-                className="mt-5 max-w-[46ch] font-sans text-[15px] sm:text-base md:text-[17px] font-normal leading-[1.68] text-deep-hull"
+                className="mt-5 max-w-[38ch] font-sans text-[15px] sm:text-base md:text-[17px] font-normal leading-[1.68] text-deep-hull"
               >
                 {sectionCopy.subtitle}
               </p>
@@ -593,34 +714,34 @@ export function Memberships() {
           {/* Right Grid: "Accredited" Focal Runway + Endless Vertical Wheel Picker */}
           <div
             ref={stageRef}
-            className="lg:col-span-7 flex items-center justify-center lg:justify-end gap-4 sm:gap-6"
+            className="lg:col-span-7 flex items-center justify-center lg:justify-end gap-2.5 sm:gap-4 xl:gap-5"
           >
             {/* Runway Axis: "Accredited" + Hairlines + Maritime Emblem */}
-            <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-              <span className="runway-anchor font-display text-xl sm:text-2xl md:text-[26px] font-normal tracking-[-0.02em] text-deep-hull shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              <span className="runway-anchor font-display text-lg sm:text-2xl md:text-[26px] font-normal tracking-[-0.02em] text-deep-hull shrink-0">
                 {(sectionCopy as { runway_label?: string })?.runway_label ?? 'Accredited'}
               </span>
 
               <span
                 aria-hidden="true"
-                className="runway-line h-px w-6 sm:w-10 md:w-14 bg-gradient-to-r from-deep-hull/20 via-deep-teal/50 to-deep-teal/75"
+                className="runway-line h-px w-4 sm:w-7 md:w-10 lg:w-7 xl:w-10 bg-gradient-to-r from-deep-hull/20 via-deep-teal/50 to-deep-teal/75"
               />
 
               <span
                 aria-hidden="true"
-                className="runway-anchor flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full border border-deep-teal/30 bg-sea-salt text-signal-blue shadow-[0_4px_14px_rgba(14,34,51,0.06)]"
+                className="runway-anchor flex h-7 w-7 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full border border-deep-teal/30 bg-sea-salt text-signal-blue shadow-[0_4px_14px_rgba(14,34,51,0.06)]"
               >
-                <Anchor size={16} weight="duotone" />
+                <Anchor size={15} weight="duotone" />
               </span>
 
               <span
                 aria-hidden="true"
-                className="runway-line h-px w-6 sm:w-10 md:w-14 bg-gradient-to-r from-deep-teal/75 via-sonar-cyan/75 to-transparent"
+                className="runway-line h-px w-4 sm:w-7 md:w-10 lg:w-7 xl:w-10 bg-gradient-to-r from-deep-teal/75 via-sonar-cyan/75 to-transparent"
               />
             </div>
 
-            {/* Endless Vertical Wheel Picker (Highlight strictly via larger & darker typography) */}
-            <div className="wheel-stage w-[170px] sm:w-[220px] md:w-[240px] shrink-0">
+            {/* Endless Vertical Wheel Picker */}
+            <div className="wheel-stage w-[185px] sm:w-[250px] md:w-[270px] lg:w-[255px] xl:w-[280px] shrink-0">
               <div
                 ref={wheelViewportRef}
                 data-lenis-prevent
@@ -632,24 +753,40 @@ export function Memberships() {
                 onPointerUp={handlePointerUpOrCancel}
                 onPointerCancel={handlePointerUpOrCancel}
                 onMouseEnter={() => {
-                  isInteractingRef.current = true;
+                  isHoveredRef.current = true;
                   clearAutoscroll();
+                  if (idleResumeTimerRef.current !== null) {
+                    window.clearTimeout(idleResumeTimerRef.current);
+                    idleResumeTimerRef.current = null;
+                  }
                 }}
                 onMouseLeave={() => {
-                  isInteractingRef.current = false;
-                  startAutoscrollIfEligible();
+                  isHoveredRef.current = false;
+                  setHoveredSlot(null);
+                  if (idleResumeTimerRef.current !== null) {
+                    window.clearTimeout(idleResumeTimerRef.current);
+                    idleResumeTimerRef.current = null;
+                  }
+                  if (!dragStateRef.current.active) {
+                    startAutoscrollIfEligible(true);
+                  }
                 }}
-                onFocus={() => {
-                  isInteractingRef.current = true;
-                  clearAutoscroll();
+                onFocus={(e) => {
+                  if (e.target.matches(':focus-visible')) {
+                    isFocusedRef.current = true;
+                    clearAutoscroll();
+                  }
                 }}
-                onBlur={() => {
-                  isInteractingRef.current = false;
-                  startAutoscrollIfEligible();
+                onBlur={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+                    isFocusedRef.current = false;
+                    if (!isHoveredRef.current && !dragStateRef.current.active) {
+                      startAutoscrollIfEligible(false);
+                    }
+                  }
                 }}
-                onWheel={handleWheel}
                 onKeyDown={handleWheelKeyDown}
-                className="relative h-[300px] md:h-[400px] w-full select-none cursor-grab active:cursor-grabbing focus-visible:outline-2 focus-visible:outline-sonar-cyan rounded-[var(--radius-md)]"
+                className="relative h-[300px] md:h-[400px] w-full touch-none select-none cursor-grab active:cursor-grabbing focus-visible:outline-2 focus-visible:outline-sonar-cyan rounded-[var(--radius-md)]"
                 style={{
                   WebkitMaskImage:
                     'linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%)',
@@ -674,10 +811,12 @@ export function Memberships() {
                       const translateY = relOffset * rowSpacing;
                       const translateX = isMobile ? 0 : -Math.pow(absDist, 1.3) * 2.5;
                       const isFocal = absDist < 0.45;
+                      const isRowHovered = hoveredSlot === virtualSlot;
+                      const isWideLogo = cert.name.toLowerCase() === 'impa';
 
                       return (
                         <button
-                          key={offset}
+                          key={virtualSlot}
                           ref={(el) => {
                             if (el) rowRefs.current.set(offset, el);
                             else rowRefs.current.delete(offset);
@@ -686,18 +825,43 @@ export function Memberships() {
                           role="option"
                           aria-selected={isFocal}
                           data-cursor="view"
+                          onMouseEnter={() => setHoveredSlot(virtualSlot)}
+                          onMouseLeave={() =>
+                            setHoveredSlot((prev) => (prev === virtualSlot ? null : prev))
+                          }
                           onClick={(e) => handleItemClick(offset, itemIdx, e.currentTarget)}
                           style={{
                             transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
-                            opacity,
+                            opacity: isRowHovered ? Math.max(opacity, 0.96) : opacity,
                           }}
-                          className={`absolute inset-x-1 sm:inset-x-2 flex items-center justify-start py-2 text-left origin-left transition-colors duration-200 will-change-transform whitespace-nowrap ${
+                          className={`group absolute inset-x-1 sm:inset-x-2 flex items-center justify-start gap-2 sm:gap-3 py-2 text-left origin-left transition-[color,opacity] duration-300 will-change-transform whitespace-nowrap ${
                             isFocal
-                              ? 'font-display text-[clamp(1.65rem,2.8vw,2.55rem)] font-medium text-deep-hull tracking-[-0.02em]'
-                              : 'font-sans text-base md:text-[18px] font-normal text-deep-hull/45'
+                              ? 'font-display text-[clamp(1.2rem,2.2vw,2.1rem)] font-medium text-deep-hull tracking-[-0.02em] leading-none'
+                              : 'font-sans text-sm sm:text-base md:text-[18px] font-normal text-deep-hull/45 hover:text-deep-hull/85 leading-none'
                           }`}
                         >
                           <span>{cert.name}</span>
+                          {cert.logo && (
+                            <img
+                              src={cert.logo}
+                              alt=""
+                              aria-hidden="true"
+                              draggable={false}
+                              className={`shrink-0 object-contain select-none transition-[filter,opacity,width,height] duration-300 ease-out ${
+                                isWideLogo
+                                  ? isFocal
+                                    ? 'h-6 sm:h-8 md:h-9 w-auto max-w-[66px] sm:max-w-[88px] md:max-w-[96px]'
+                                    : 'h-4 sm:h-5 md:h-6 w-auto max-w-[46px] sm:max-w-[58px]'
+                                  : isFocal
+                                    ? 'h-7 w-7 sm:h-9 sm:w-9 md:h-10 md:w-10'
+                                    : 'h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7'
+                              } ${
+                                isFocal || isRowHovered
+                                  ? 'grayscale-0 opacity-100 contrast-100'
+                                  : 'grayscale opacity-50 contrast-90 group-hover:grayscale-0 group-hover:opacity-100 group-hover:contrast-100'
+                              }`}
+                            />
+                          )}
                         </button>
                       );
                     })}

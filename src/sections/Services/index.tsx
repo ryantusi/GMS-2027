@@ -9,14 +9,13 @@ import {
 } from 'react';
 import {
   Anchor,
-  Compass,
-  Package,
-  ShieldCheck,
-  Wrench,
-  Lifebuoy,
   Drop,
-  Lightning,
-  Cube,
+  Engine,
+  GearSix,
+  Handshake,
+  Package,
+  Trash,
+  Wrench,
 } from '@phosphor-icons/react';
 import { gsap, SplitText, useGSAP, MOTION } from '../../lib/scroll';
 import { useAppStore } from '../../lib/store';
@@ -33,19 +32,80 @@ interface ServiceItem {
   hullY: number;
 }
 
-const SERVICE_ICON_MAP: Record<
-  string,
-  ComponentType<{ size?: number; weight?: 'regular' | 'duotone' | 'bold'; className?: string }>
-> = {
-  compass: Compass,
-  shield: ShieldCheck,
+interface ServiceIconProps {
+  size?: number;
+  weight?: 'regular' | 'duotone' | 'bold';
+  className?: string;
+}
+
+/** Custom Phosphor-weight duotone Cash Bundle SVG for Cash to Master */
+function CashBundleIcon({ size = 22, className = '' }: ServiceIconProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 256 256"
+      fill="none"
+      aria-hidden="true"
+      className={className}
+    >
+      <rect x="16" y="48" width="184" height="112" rx="12" fill="currentColor" opacity="0.16" />
+      <rect x="86" y="48" width="44" height="112" fill="currentColor" opacity="0.22" />
+      <rect
+        x="16"
+        y="48"
+        width="184"
+        height="112"
+        rx="12"
+        stroke="currentColor"
+        strokeWidth="16"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M40 184H208A12 12 0 0 0 220 172V72"
+        stroke="currentColor"
+        strokeWidth="16"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M64 208H228A12 12 0 0 0 240 196V96"
+        stroke="currentColor"
+        strokeWidth="16"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <rect
+        x="86"
+        y="48"
+        width="44"
+        height="112"
+        stroke="currentColor"
+        strokeWidth="16"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M86 160L134 208M130 160L178 208"
+        stroke="currentColor"
+        strokeWidth="16"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+const SERVICE_ICON_MAP: Record<string, ComponentType<ServiceIconProps>> = {
+  gear: GearSix,
   drop: Drop,
   package: Package,
-  cube: Cube,
-  lightning: Lightning,
+  handshake: Handshake,
+  cash: CashBundleIcon,
+  trash: Trash,
   wrench: Wrench,
+  engine: Engine,
   anchor: Anchor,
-  lifebuoy: Lifebuoy,
 };
 
 interface ServiceTiltCardProps {
@@ -712,6 +772,7 @@ export function Services() {
                   } else {
                     useAppStore.getState().setNavTheme('dark');
                   }
+                  useAppStore.getState().setBottomTheme(self.progress >= 0.2 ? 'light' : 'dark');
                 },
               },
             });
@@ -773,7 +834,7 @@ export function Services() {
                 maskEl.style.marginBottom = '-0.16em';
               }
             });
-            gsap.set(titleSplit.lines, { yPercent: 112 });
+            gsap.set(titleSplit.lines, { yPercent: 112, autoAlpha: 0 });
           }
           if (titleWrapRef.current) {
             // Start large in the centre of the viewport
@@ -854,12 +915,13 @@ export function Services() {
             },
           });
 
-          // 0–15%: The title arrives large in the centre of the screen, rising line by line
+          // 0–15%: The title arrives large in the centre of the screen, rising and fading in line by line
           if (titleSplit?.lines && titleSplit.lines.length > 0) {
             tl.to(
               titleSplit.lines,
               {
                 yPercent: 0,
+                autoAlpha: 1,
                 stagger: 2.2,
                 duration: 13,
                 ease: 'power2.out',
@@ -952,6 +1014,9 @@ export function Services() {
               80
             );
           }
+          return () => {
+            titleSplit?.revert();
+          };
         }
       );
     },
@@ -1052,16 +1117,16 @@ export function Services() {
                           : 'bg-sea-salt/45 border-white/75 ring-1 ring-deep-hull/8 hover:bg-sea-salt/60 hover:border-sonar-cyan/70 hover:ring-sonar-cyan/25'
                       }`}
                     >
-                      <div className="flex items-center gap-2 lg:gap-2.5">
+                      <div className="flex items-center gap-2.5 lg:gap-3">
                         <span
-                          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border transition-all duration-300 ease-out ${
+                          className={`flex h-9 w-9 lg:h-10 lg:w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 ease-out ${
                             isActive
                               ? 'bg-deep-hull text-sonar-cyan border-deep-hull shadow-sm'
                               : 'bg-white/55 text-signal-blue border-deep-hull/12 group-hover:bg-deep-hull group-hover:text-sonar-cyan group-hover:border-deep-hull group-hover:shadow-sm'
                           }`}
                         >
                           <IconComp
-                            size={16}
+                            size={22}
                             weight="duotone"
                             className="transition-colors duration-300"
                           />
@@ -1169,16 +1234,16 @@ export function Services() {
                           : 'bg-sea-salt/45 border-white/75 ring-1 ring-deep-hull/8 hover:bg-sea-salt/60 hover:border-sonar-cyan/70 hover:ring-sonar-cyan/25'
                       }`}
                     >
-                      <div className="flex items-center gap-2 lg:gap-2.5">
+                      <div className="flex items-center gap-2.5 lg:gap-3">
                         <span
-                          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border transition-all duration-300 ease-out ${
+                          className={`flex h-9 w-9 lg:h-10 lg:w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 ease-out ${
                             isActive
                               ? 'bg-deep-hull text-sonar-cyan border-deep-hull shadow-sm'
                               : 'bg-white/55 text-signal-blue border-deep-hull/12 group-hover:bg-deep-hull group-hover:text-sonar-cyan group-hover:border-deep-hull group-hover:shadow-sm'
                           }`}
                         >
                           <IconComp
-                            size={16}
+                            size={22}
                             weight="duotone"
                             className="transition-colors duration-300"
                           />
@@ -1219,16 +1284,16 @@ export function Services() {
                         : 'bg-sea-salt/45 border-white/75 ring-1 ring-deep-hull/8 hover:bg-sea-salt/60 hover:border-sonar-cyan/70'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-3">
                       <span
-                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border transition-all duration-300 ease-out ${
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 ease-out ${
                           isActive
                             ? 'bg-deep-hull text-sonar-cyan border-deep-hull shadow-sm'
                             : 'bg-white/55 text-signal-blue border-deep-hull/12 group-hover:bg-deep-hull group-hover:text-sonar-cyan group-hover:border-deep-hull group-hover:shadow-sm'
                         }`}
                       >
                         <IconComp
-                          size={16}
+                          size={22}
                           weight="duotone"
                           className="transition-colors duration-300"
                         />
