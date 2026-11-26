@@ -9,7 +9,7 @@ import {
   CaretDown,
 } from '@phosphor-icons/react';
 import { gsap, ScrollTrigger, useGSAP, MOTION } from '../../lib/scroll';
-import { getLenis, scrollToTarget, stopLenis, startLenis } from '../../lib/lenis';
+import { getLenis, scrollToTarget, scrollToLocations, stopLenis, startLenis } from '../../lib/lenis';
 import { useAppStore } from '../../lib/store';
 import siteData from '../../content/site.json';
 import storesData from '../../content/stores.json';
@@ -448,17 +448,8 @@ export function Navbar() {
       }
 
       if (sectionId === 'network') {
-        const networkEl = document.getElementById('network');
-        const networkTrigger = networkEl
-          ? ScrollTrigger.getAll().find((st) => st.trigger === networkEl && st.vars.pin)
-          : null;
-
-        if (networkTrigger) {
-          const targetY =
-            networkTrigger.start + (networkTrigger.end - networkTrigger.start) * 0.88;
-          scrollToTarget(targetY, { offset: 0 });
-          return;
-        }
+        scrollToLocations();
+        return;
       }
 
       scrollToTarget(`#${sectionId}`, { offset });

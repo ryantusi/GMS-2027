@@ -12,10 +12,8 @@ import {
   Anchor,
   ArrowLeft,
   ArrowRight,
-  ArrowUpRight,
   MagnifyingGlassPlus,
   MagnifyingGlassMinus,
-  SealCheck,
 } from '@phosphor-icons/react';
 import { gsap, SplitText, useGSAP, MOTION } from '../../lib/scroll';
 import { useAppStore } from '../../lib/store';
@@ -872,13 +870,15 @@ export function Memberships() {
         </div>
       </div>
 
-      {/* Shared Dialog: Certificate Viewer */}
+      {/* Shared Dialog: Centered Certificate Viewer */}
       <Dialog
         isOpen={viewerIndex !== null && activeCertificate !== null}
         onClose={() => setViewerIndex(null)}
         title={activeCertificate?.name ?? ''}
         triggerEl={triggerEl}
         variant="modal"
+        hideHeader
+        maxWidthClassName="md:max-w-[500px]"
         hashId={
           activeCertificate
             ? `certificate-${activeCertificate.name.toLowerCase().replace(/\s+/g, '-')}`
@@ -904,131 +904,87 @@ export function Memberships() {
                 }
               }
             }}
-            className="flex flex-col gap-6"
+            className="flex flex-col items-center text-center gap-5 pt-1"
           >
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-start">
-              {/* Left Column: Portrait A4 Certificate Scan Placeholder + Click-to-Zoom */}
-              <div className="md:col-span-5 flex flex-col gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setZoomPan({ x: 0, y: 0 });
-                    setIsZoomed(true);
-                  }}
-                  className="group relative w-full overflow-hidden rounded-[var(--radius-md)] border border-deep-hull/15 shadow-md text-left focus-visible:outline-2 focus-visible:outline-sonar-cyan"
-                  aria-label={`${activeCertificate.name} — ${viewerLabels?.zoom_hint ?? 'Zoom'}`}
-                >
-                  <MediaPlaceholder
-                    label={activeCertificate.name}
-                    sublabel={activeCertificate.standard ?? companyName}
-                    icon="certificate"
-                    aspectRatio="1 / 1.414"
-                    theme="light"
-                    className="w-full transition-transform duration-300 group-hover:scale-[1.02]"
-                  />
-                  <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-deep-hull/85 px-3 py-1.5 font-sans text-xs font-medium text-sea-salt backdrop-blur-sm">
-                    <MagnifyingGlassPlus size={14} weight="bold" />
-                    <span>Zoom</span>
-                  </span>
-                </button>
-                {viewerLabels?.zoom_hint && (
-                  <p className="font-sans text-[11px] text-deep-hull/60">
-                    {viewerLabels.zoom_hint}
-                  </p>
-                )}
-              </div>
+            {/* 1. Centered Membership Title + Logo */}
+            <div className="flex items-center justify-center gap-3 px-10">
+              <h3 className="font-display text-2xl sm:text-[28px] font-normal text-deep-hull leading-tight">
+                {activeCertificate.name}
+              </h3>
+              {activeCertificate.logo && (
+                <img
+                  src={activeCertificate.logo}
+                  alt={`${activeCertificate.name} logo`}
+                  draggable={false}
+                  className={`shrink-0 object-contain select-none ${
+                    activeCertificate.name.toLowerCase() === 'impa'
+                      ? 'h-7 sm:h-8 w-auto max-w-[96px]'
+                      : 'h-8 w-8 sm:h-9 sm:w-9'
+                  }`}
+                />
+              )}
+            </div>
 
-              {/* Right Column: Structured Certificate Details */}
-              <div className="md:col-span-7 flex flex-col justify-between gap-6">
-                <div className="flex flex-col gap-4">
-                  <div className="inline-flex items-center gap-2 self-start rounded-full bg-signal-blue/10 px-3 py-1 font-sans text-xs font-semibold text-signal-blue">
-                    <SealCheck size={16} weight="fill" />
-                    <span>{activeCertificate.status ?? 'Verified'}</span>
-                  </div>
+            {/* 2. Centered Certification Image Placeholder + Click-to-Zoom */}
+            <div className="flex w-full max-w-[270px] sm:max-w-[295px] flex-col items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setZoomPan({ x: 0, y: 0 });
+                  setIsZoomed(true);
+                }}
+                className="group relative w-full overflow-hidden rounded-[var(--radius-md)] border border-deep-hull/15 shadow-md text-left focus-visible:outline-2 focus-visible:outline-sonar-cyan"
+                aria-label={`${activeCertificate.name} — ${viewerLabels?.zoom_hint ?? 'Zoom'}`}
+              >
+                <MediaPlaceholder
+                  label={activeCertificate.name}
+                  sublabel={activeCertificate.standard ?? companyName}
+                  icon="certificate"
+                  aspectRatio="1 / 1.414"
+                  theme="light"
+                  className="w-full transition-transform duration-300 group-hover:scale-[1.02]"
+                />
+                <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-deep-hull/85 px-3 py-1.5 font-sans text-xs font-medium text-sea-salt backdrop-blur-sm">
+                  <MagnifyingGlassPlus size={14} weight="bold" />
+                  <span>Zoom</span>
+                </span>
+              </button>
+              {viewerLabels?.zoom_hint && (
+                <p className="font-sans text-[11px] text-deep-hull/60 text-center">
+                  {viewerLabels.zoom_hint}
+                </p>
+              )}
+            </div>
 
-                  <h3 className="font-display text-h2 font-normal text-deep-hull leading-tight">
-                    {activeCertificate.name}
-                  </h3>
+            {/* 3. Centered Pagination Buttons at Bottom of Image */}
+            <div className="flex w-full max-w-[360px] items-center justify-center gap-3 sm:gap-4 border-t border-deep-hull/10 pt-4">
+              <button
+                type="button"
+                onClick={() =>
+                  setViewerIndex(wrapIndex(viewerIndex - 1, itemCount))
+                }
+                aria-label={viewerLabels?.prev_label ?? 'Previous certificate'}
+                className="inline-flex items-center gap-2 rounded-full border border-deep-hull/15 px-3.5 py-2 font-sans text-xs font-medium text-deep-hull transition-colors hover:border-signal-blue hover:text-signal-blue cursor-pointer"
+              >
+                <ArrowLeft size={15} weight="bold" />
+                <span>{items[wrapIndex(viewerIndex - 1, itemCount)]?.name}</span>
+              </button>
 
-                  {activeCertificate.standard && (
-                    <div>
-                      <p className="font-sans text-xs font-semibold uppercase tracking-[0.08em] text-deep-hull/55">
-                        {viewerLabels?.standard}
-                      </p>
-                      <p className="mt-0.5 font-sans text-sm font-medium text-deep-hull">
-                        {activeCertificate.standard}
-                      </p>
-                    </div>
-                  )}
+              <span className="font-sans text-xs tabular-nums text-deep-hull/55 px-1">
+                {viewerIndex + 1} / {itemCount}
+              </span>
 
-                  {activeCertificate.issuer && (
-                    <div>
-                      <p className="font-sans text-xs font-semibold uppercase tracking-[0.08em] text-deep-hull/55">
-                        {viewerLabels?.issuer}
-                      </p>
-                      <p className="mt-0.5 font-sans text-sm text-deep-hull/90">
-                        {activeCertificate.issuer}
-                      </p>
-                    </div>
-                  )}
-
-                  {activeCertificate.description && (
-                    <div>
-                      <p className="font-sans text-xs font-semibold uppercase tracking-[0.08em] text-deep-hull/55">
-                        {viewerLabels?.scope}
-                      </p>
-                      <p className="mt-1 font-sans text-base leading-relaxed text-deep-hull/80">
-                        {activeCertificate.description}
-                      </p>
-                    </div>
-                  )}
-
-                  {activeCertificate.verify_url && (
-                    <div className="pt-2">
-                      <a
-                        href={activeCertificate.verify_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 rounded-full border border-signal-blue/30 bg-signal-blue/5 px-4 py-2 font-sans text-xs font-semibold uppercase tracking-[0.06em] text-signal-blue transition-colors hover:bg-signal-blue hover:text-sea-salt"
-                      >
-                        <span>{viewerLabels?.verify_cta}</span>
-                        <ArrowUpRight size={15} weight="bold" />
-                      </a>
-                    </div>
-                  )}
-                </div>
-
-                {/* Prev / Next Certificate Navigation Bar */}
-                <div className="flex items-center justify-between border-t border-deep-hull/10 pt-4 mt-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setViewerIndex(wrapIndex(viewerIndex - 1, itemCount))
-                    }
-                    aria-label={viewerLabels?.prev_label ?? 'Previous certificate'}
-                    className="inline-flex items-center gap-2 rounded-full border border-deep-hull/15 px-3.5 py-2 font-sans text-xs font-medium text-deep-hull transition-colors hover:border-signal-blue hover:text-signal-blue"
-                  >
-                    <ArrowLeft size={15} weight="bold" />
-                    <span>{ items[wrapIndex(viewerIndex - 1, itemCount)]?.name }</span>
-                  </button>
-
-                  <span className="font-sans text-xs tabular-nums text-deep-hull/55">
-                    {viewerIndex + 1} / {itemCount}
-                  </span>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setViewerIndex(wrapIndex(viewerIndex + 1, itemCount))
-                    }
-                    aria-label={viewerLabels?.next_label ?? 'Next certificate'}
-                    className="inline-flex items-center gap-2 rounded-full border border-deep-hull/15 px-3.5 py-2 font-sans text-xs font-medium text-deep-hull transition-colors hover:border-signal-blue hover:text-signal-blue"
-                  >
-                    <span>{ items[wrapIndex(viewerIndex + 1, itemCount)]?.name }</span>
-                    <ArrowRight size={15} weight="bold" />
-                  </button>
-                </div>
-              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setViewerIndex(wrapIndex(viewerIndex + 1, itemCount))
+                }
+                aria-label={viewerLabels?.next_label ?? 'Next certificate'}
+                className="inline-flex items-center gap-2 rounded-full border border-deep-hull/15 px-3.5 py-2 font-sans text-xs font-medium text-deep-hull transition-colors hover:border-signal-blue hover:text-signal-blue cursor-pointer"
+              >
+                <span>{items[wrapIndex(viewerIndex + 1, itemCount)]?.name}</span>
+                <ArrowRight size={15} weight="bold" />
+              </button>
             </div>
 
             {/* Full-screen Pointer-Panning Zoom Overlay */}

@@ -34,7 +34,7 @@ interface FormErrors {
 }
 
 /** Custom phone-integrated-with-globe SVG icon matching Contact channel badge proportions */
-function InternationalPhoneIcon({ size = 20 }: { size?: number }) {
+export function InternationalPhoneIcon({ size = 20 }: { size?: number }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -76,7 +76,7 @@ function InternationalPhoneIcon({ size = 20 }: { size?: number }) {
   );
 }
 
-const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 const ACCEPTED_MIME_TYPES = [
   'application/pdf',
   'application/vnd.ms-excel',
@@ -321,28 +321,53 @@ export function Contact() {
 
     setSubmitState('sending');
 
-    const endpoint = contactCopy?.form_endpoint?.trim() ?? '';
+    const endpoint =
+      contactCopy?.form_endpoint?.trim() ||
+      'https://formsubmit.co/ajax/info@globalmarinesupplies.com';
 
     try {
-      if (endpoint) {
-        const formData = new FormData();
-        formData.append('email', values.email);
-        formData.append('subject', values.subject);
-        formData.append('message', values.message);
-        if (attachment) {
-          formData.append('attachment', attachment);
-        }
+      const cleanEmail = values.email.trim();
+      const cleanSubject = values.subject.trim();
+      const cleanMessage = values.message.trim();
 
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          body: formData,
-        });
+      const formData = new FormData();
+      formData.append('email', cleanEmail);
+      formData.append('subject', cleanSubject);
+      formData.append('message', cleanMessage);
+      formData.append('_subject', `[GMS Website Enquiry] ${cleanSubject}`);
+      formData.append('_replyto', cleanEmail);
+      formData.append('_template', 'table');
+      formData.append('_captcha', 'false');
+      formData.append('_honey', values.honeypot);
 
-        if (!response.ok) {
-          throw new Error('Submission failed');
-        }
-      } else {
-        await new Promise((resolve) => window.setTimeout(resolve, 900));
+      if (attachment) {
+        formData.append('attachment', attachment);
+      }
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      let result: { success?: boolean | string; message?: string } | null = null;
+      try {
+        result = (await response.json()) as {
+          success?: boolean | string;
+          message?: string;
+        };
+      } catch {
+        result = null;
+      }
+
+      const isConfirmed =
+        response.ok &&
+        (result?.success === true || result?.success === 'true');
+
+      if (!isConfirmed) {
+        throw new Error(result?.message || 'Submission failed');
       }
 
       setSubmitState('sent');

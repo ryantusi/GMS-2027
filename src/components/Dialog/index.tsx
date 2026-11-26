@@ -10,6 +10,8 @@ export interface DialogProps {
   triggerEl?: HTMLElement | null;
   variant?: 'modal' | 'drawer';
   hashId?: string;
+  hideHeader?: boolean;
+  maxWidthClassName?: string;
   children?: ReactNode;
 }
 
@@ -30,6 +32,8 @@ export function Dialog({
   triggerEl,
   variant = 'modal',
   hashId = 'dialog',
+  hideHeader = false,
+  maxWidthClassName = 'md:max-w-4xl',
   children,
 }: DialogProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -235,7 +239,7 @@ export function Dialog({
         className={`relative z-10 flex flex-col bg-sea-salt text-deep-hull shadow-hull-lg border border-harbour-mist overflow-hidden w-full ${
           isDrawer
             ? 'max-h-[88dvh] rounded-t-[var(--radius-lg)] md:max-h-[92dvh] md:w-[480px] md:ml-auto md:mr-4 md:rounded-[var(--radius-lg)]'
-            : 'max-h-[88dvh] rounded-t-[var(--radius-lg)] md:max-h-[86dvh] md:max-w-4xl md:rounded-[var(--radius-lg)] md:mx-6'
+            : `max-h-[88dvh] rounded-t-[var(--radius-lg)] md:max-h-[88dvh] ${maxWidthClassName} md:rounded-[var(--radius-lg)] md:mx-6`
         }`}
       >
         {/* Mobile bottom-sheet drag handle */}
@@ -248,20 +252,31 @@ export function Dialog({
           <span className="h-1.5 w-12 rounded-full bg-deep-hull/20" />
         </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-harbour-mist px-6 py-4">
-          <h3 className="font-display text-xl font-medium text-deep-hull">
-            {title}
-          </h3>
+        {/* Header (or minimal top-right close button when hideHeader is enabled) */}
+        {hideHeader ? (
           <button
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-deep-hull/15 text-deep-hull/75 hover:border-deep-teal hover:text-deep-teal transition-colors"
+            className="absolute top-4 right-4 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-deep-hull/15 bg-sea-salt/90 text-deep-hull/75 hover:border-deep-teal hover:text-deep-teal transition-colors backdrop-blur-sm"
           >
-            <X size={18} weight="regular" />
+            <X size={17} weight="regular" />
           </button>
-        </div>
+        ) : (
+          <div className="flex items-center justify-between border-b border-harbour-mist px-6 py-4">
+            <h3 className="font-display text-xl font-medium text-deep-hull">
+              {title}
+            </h3>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close dialog"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-deep-hull/15 text-deep-hull/75 hover:border-deep-teal hover:text-deep-teal transition-colors"
+            >
+              <X size={18} weight="regular" />
+            </button>
+          </div>
+        )}
 
         {/* Internally scrolling content area with data-lenis-prevent */}
         <div

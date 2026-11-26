@@ -48,23 +48,24 @@ export function CopyField({
 
   const isDark = theme === 'dark';
   const textColor = isDark ? 'text-sea-salt' : 'text-deep-hull';
+  const linkHover = isDark ? 'hover:text-sonar-cyan' : 'hover:text-[#00A9CE]';
   const mutedColor = isDark ? 'text-sea-salt/65' : 'text-deep-hull/65';
   const accentBorder = isDark
-    ? 'border-sonar-cyan/25 hover:border-sonar-cyan/60 text-sea-salt/80 hover:text-sonar-cyan'
-    : 'border-deep-teal/25 hover:border-deep-teal/60 text-deep-hull/80 hover:text-deep-teal';
+    ? 'border-sonar-cyan/25 hover:border-sonar-cyan/70 text-sea-salt/80 hover:text-sonar-cyan'
+    : 'border-deep-hull/15 hover:border-[#00A9CE]/65 text-deep-hull/75 hover:text-[#00A9CE]';
 
   return (
-    <div className={`inline-flex items-center gap-2.5 ${className}`}>
+    <div className={`inline-flex items-center gap-2 ${className}`}>
       {label && <span className={`text-xs ${mutedColor}`}>{label}</span>}
       {href ? (
         <a
           href={href}
-          className={`tabular-nums text-sm font-medium ${textColor} hover:underline transition-colors`}
+          className={`tabular-nums text-[13.5px] font-medium ${textColor} ${linkHover} transition-colors duration-300 ease-out`}
         >
           {value}
         </a>
       ) : (
-        <span className={`tabular-nums text-sm font-medium ${textColor}`}>
+        <span className={`tabular-nums text-[13.5px] font-medium ${textColor}`}>
           {value}
         </span>
       )}
@@ -72,12 +73,12 @@ export function CopyField({
         type="button"
         onClick={handleCopy}
         aria-label={`Copy ${value}`}
-        className={`inline-flex items-center gap-1 rounded-[var(--radius-sm)] border px-2 py-1 text-xs transition-colors min-h-[32px] ${accentBorder}`}
+        className={`inline-flex items-center gap-1 rounded-[var(--radius-sm)] border px-2 py-1 text-xs transition-colors duration-300 ease-out min-h-[30px] cursor-pointer ${accentBorder}`}
       >
         {copied ? (
           <>
-            <Check size={13} weight="bold" />
-            <span>Copied</span>
+            <Check size={13} weight="bold" className="text-[#00A9CE]" />
+            <span className="text-[#00A9CE]">Copied</span>
           </>
         ) : (
           <Copy size={13} weight="regular" />

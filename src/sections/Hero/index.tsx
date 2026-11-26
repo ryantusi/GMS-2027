@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode, type PointerEvent } from 'react';
 import { GlobeHemisphereWest, ChatCircleDots } from '@phosphor-icons/react';
 import { gsap, ScrollTrigger, useGSAP, MOTION } from '../../lib/scroll';
-import { scrollToTarget } from '../../lib/lenis';
+import { scrollToLocations } from '../../lib/lenis';
 import { useAppStore } from '../../lib/store';
 import { FrameSequence, type FrameSequenceHandle } from '../../engines/FrameSequence';
 import heroData from '../../content/hero.json';
@@ -681,7 +681,7 @@ export function Hero() {
             <button
               id="hero-explore-btn"
               type="button"
-              onClick={() => scrollToTarget('#network')}
+              onClick={scrollToLocations}
               className="group relative flex h-[42px] items-center gap-2 sm:gap-2.5 rounded-full px-4 sm:px-4.5 font-sans text-xs sm:text-[13px] font-bold tracking-wide transition-all duration-300 shadow-[0_4px_24px_rgba(11,94,142,0.45)] bg-gradient-to-r from-[#005268] via-[#0B5E8E] to-[#03C5EC] text-white border border-[#03C5EC]/60 hover:bg-none hover:bg-transparent hover:border-[#03C5EC] hover:shadow-[0_0_24px_rgba(3,197,236,0.6)] cursor-pointer shrink-0"
             >
               <span>Explore Our Locations</span>

@@ -51,6 +51,24 @@ export function scrollToTarget(
   });
 }
 
+/** Navigates directly to the docked interactive state of the Locations (`#network`) section. */
+export function scrollToLocations(): void {
+  const networkEl = document.getElementById('network');
+  const networkTrigger = networkEl
+    ? ScrollTrigger.getAll().find((st) => st.trigger === networkEl && st.vars.pin)
+    : null;
+
+  if (networkTrigger) {
+    const targetY =
+      networkTrigger.start + (networkTrigger.end - networkTrigger.start) * 0.88;
+    scrollToTarget(targetY, { offset: 0 });
+    return;
+  }
+
+  const offset = window.innerWidth >= 768 ? -72 : -64;
+  scrollToTarget('#network', { offset });
+}
+
 export const scrollToSection = scrollToTarget;
 
 export function destroyLenis(): void {

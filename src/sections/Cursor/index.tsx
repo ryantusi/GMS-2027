@@ -31,6 +31,7 @@ export function Cursor() {
   const navTheme = useAppStore((s) => s.navTheme);
   const activeSection = useAppStore((s) => s.activeSection);
   const isHeroPinned = useAppStore((s) => s.isHeroPinned);
+  const activeDialog = useAppStore((s) => s.activeDialog);
 
   const [isFinePointer, setIsFinePointer] = useState(false);
   const [cursorMode, setCursorMode] = useState<CursorMode>('default');
@@ -204,8 +205,10 @@ export function Cursor() {
 
   if (!isFinePointer) return null;
 
-  // The cursor should be light in Hero section (since Hero is a dark ocean theme) or in dark navTheme sections
-  const isCursorLight = isHeroPinned || activeSection === 'hero' || navTheme === 'dark';
+  // Use light-themed Deep Teal cursor on modal pop-up views (bg-sea-salt) regardless of underlying section
+  const isCursorLight = activeDialog
+    ? false
+    : isHeroPinned || activeSection === 'hero' || navTheme === 'dark';
   const isHovered = cursorMode === 'hover';
 
   // Adaptive theme colors: crisp and luminous on dark, deep and sharp on light
@@ -237,7 +240,7 @@ export function Cursor() {
     <div
       ref={rootRef}
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-50 overflow-hidden select-none"
+      className="pointer-events-none fixed inset-0 z-[90] overflow-hidden select-none"
     >
       {/* Ring Follower (34px base diameter, grows to 52px on hover) */}
       <div

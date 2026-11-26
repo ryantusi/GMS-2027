@@ -1,31 +1,37 @@
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  At,
   CaretDown,
   ChatCircleDots,
+  Check,
+  Copy,
   GlobeHemisphereWest,
   MagnifyingGlass,
+  MapPin,
+  Phone,
   WhatsappLogo,
   X,
 } from '@phosphor-icons/react';
+import ReactCountryFlag from 'react-country-flag';
 import { useAppStore } from '../../lib/store';
-import { scrollToTarget } from '../../lib/lenis';
+import { scrollToLocations } from '../../lib/lenis';
 import { Dialog } from '../../components/Dialog';
 import { CopyField } from '../../components/CopyField';
-import { NETWORK_DATA, type LocationNode } from '../../lib/locations';
+import {
+  NETWORK_DATA,
+  getLocalTimeAtLongitude,
+  type LocationNode,
+} from '../../lib/locations';
+import { InternationalPhoneIcon } from '../Contact';
 import siteData from '../../content/site.json';
 
 /**
  * G3: Floating Contact Button & Contact Directory (DESIGN.md Section G3)
- * - Floating glassmorphism pill fixed at bottom-right (56px tall), adapting to `navTheme` (`glass-light` vs `glass-dark`).
- * - Context-aware visibility: hidden during Preloader and Hero (`isHeroPinned`), appears after Hero with a small rise,
- *   and hides while the Contact section is on screen (`isContactVisible`), while mobile menu is open, or while a dialog is open.
- * - Morphing into Directory: expands from `pillRef` into the shared `Dialog` (`variant="drawer"`, 480px wide right panel on desktop,
- *   draggable bottom sheet on mobile) via GSAP Flip.
- * - Contents ordered most general to most specific:
- *   1. Main contacts (24/7 operations phone + General email with `CopyField` + WhatsApp button)
- *   2. By department (`Sales & RFQs · 24/7 Operations · UAE & Gulf Desk` with `CopyField`)
- *   3. By country (instant search + continent accordions from `locations.json`, with `CopyField` and a
- *      "Show on globe" button that closes the directory, scrolls to `#network`, and sets `selectedCountryId`).
+ * - Floating glassmorphism pill fixed at bottom-right adapting dynamically to bottomTheme.
+ * - Opens a centered wide modal featuring GMS branding, structured Main Contacts matching
+ *   the Contact section (Office Address, Phone Lines, International Line, Email Addresses +
+ *   WhatsApp Us & copy controls), and a collapsible By Country directory with country flags,
+ *   local times, and instant search.
  */
 export function ContactDirectory() {
   const pillRef = useRef<HTMLButtonElement>(null);
@@ -42,18 +48,20 @@ export function ContactDirectory() {
   const isDark = bottomTheme === 'dark';
   const isOpen = activeDialog === 'directory';
 
+  const companyName = siteData?.website_info?.company_name ?? 'Global Marine Supplies';
   const dirCopy = siteData?.contact_directory;
+  const bandCopy = siteData?.contact_section?.details_band;
+  const officesInfo = siteData?.contact_and_offices;
   const pillLabel = siteData?.navigation?.contact_pill_label ?? 'Contact us';
-  const mainPhone = siteData?.contact_and_offices?.phones?.[0] ?? '';
-  const mainEmail = siteData?.contact_and_offices?.emails?.[0] ?? '';
-  const departments = dirCopy?.departments ?? [];
 
-  const [activeDeptIdx, setActiveDeptIdx] = useState(0);
+  const phones = officesInfo?.phones ?? [];
+  const emails = officesInfo?.emails ?? [];
+  const internationalLine = officesInfo?.international_line ?? '+1 945 9972408';
+  const headOffice = officesInfo?.head_office;
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [openContinents, setOpenContinents] = useState<Record<string, boolean>>({
-    Asia: true,
-    Africa: true,
-  });
+  const [openContinent, setOpenContinent] = useState<string | null>(null);
+  const [addressCopied, setAddressCopied] = useState(false);
 
   // Display floating pill after Hero through all sections, hiding during Preloader, Hero pinned, Contact section, or when mobile menu / dialog is active
   const isPillVisible =
@@ -72,7 +80,6 @@ export function ContactDirectory() {
         const matches = group.locations.filter(
           (loc) =>
             loc.country.toLowerCase().includes(trimmedQuery) ||
-            loc.city.toLowerCase().includes(trimmedQuery) ||
             (loc.address && loc.address.toLowerCase().includes(trimmedQuery))
         );
         return {
@@ -84,22 +91,36 @@ export function ContactDirectory() {
   }, [trimmedQuery]);
 
   const toggleContinent = (continent: string) => {
-    setOpenContinents((prev) => ({
-      ...prev,
-      [continent]: !prev[continent],
-    }));
+    setOpenContinent((prev) => (prev === continent ? null : continent));
   };
 
-  // "Show on globe" action: closes directory, scrolls to Network, and selects that country on the 3D globe
+  const handleCopyAddress = useCallback(async () => {
+    const addr = headOffice?.address;
+    if (!addr) return;
+    try {
+      await navigator.clipboard.writeText(addr);
+    } catch {
+      const textarea = document.createElement('textarea');
+      textarea.value = addr;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
+    setAddressCopied(true);
+    window.setTimeout(() => setAddressCopied(false), 1800);
+  }, [headOffice?.address]);
+
+  // "Show on globe" action: closes directory, scrolls directly to Locations interactive view, and selects that country
   const handleShowOnGlobe = (loc: LocationNode) => {
     setActiveDialog(null);
     setSelectedCountryId(loc.id);
     window.setTimeout(() => {
-      scrollToTarget('#network');
+      scrollToLocations();
     }, 80);
   };
-
-  const activeDept = departments[activeDeptIdx] ?? departments[0];
 
   return (
     <>
@@ -138,56 +159,156 @@ export function ContactDirectory() {
         </button>
       </div>
 
-      {/* Shared Dialog: Contact Directory Panel (480px right drawer on desktop, bottom sheet on mobile) */}
+      {/* Shared Dialog: Centered Wide Contact Directory Modal */}
       <Dialog
         isOpen={isOpen}
         onClose={() => setActiveDialog(null)}
         title={dirCopy?.title ?? 'Contact directory'}
         triggerEl={pillRef.current}
-        variant="drawer"
+        variant="modal"
+        hideHeader
+        maxWidthClassName="md:max-w-3xl"
         hashId="contact-directory"
       >
         <div className="flex flex-col gap-7 pb-4">
-          {/* 1. Main Contacts (24/7 operations phone, General email, WhatsApp CTA) */}
-          <section aria-label={dirCopy?.main_contacts_heading ?? 'Main contacts'}>
-            <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.08em] text-deep-hull/55">
-              {dirCopy?.main_contacts_heading ?? 'Main contacts'}
+          {/* Top Centered GMS Logo & Title */}
+          <div className="flex flex-col items-center text-center gap-2.5 border-b border-harbour-mist pb-5 pt-1 px-8">
+            <img
+              src="/logos/logo-trans.png"
+              alt={companyName}
+              draggable={false}
+              className="h-11 sm:h-12 w-auto object-contain select-none"
+            />
+            <h3 className="font-display text-2xl sm:text-[28px] font-normal text-deep-hull leading-tight">
+              {dirCopy?.title ?? 'Contact directory'}
             </h3>
+          </div>
 
-            <div className="mt-3 flex flex-col gap-2.5 rounded-[var(--radius-md)] border border-deep-hull/10 bg-harbour-mist/35 p-4">
-              {mainPhone && (
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-sans text-xs font-medium text-deep-hull/70">
-                    {dirCopy?.operations_label ?? '24/7 operations'}
-                  </span>
-                  <CopyField
-                    value={mainPhone}
-                    href={`tel:${mainPhone.replace(/\s+/g, '')}`}
-                    theme="light"
-                  />
-                </div>
-              )}
+          {/* 1. Main Contacts (Structured to match the Contact section) */}
+          <section aria-label={dirCopy?.main_contacts_heading ?? 'Main contacts'}>
+            <h4 className="font-sans text-xs font-semibold uppercase tracking-[0.08em] text-deep-hull/55">
+              {dirCopy?.main_contacts_heading ?? 'Main contacts'}
+            </h4>
 
-              {mainEmail && (
-                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-deep-hull/10 pt-2.5">
-                  <span className="font-sans text-xs font-medium text-deep-hull/70">
-                    {dirCopy?.general_label ?? 'General'}
+            <div className="mt-3 rounded-[var(--radius-md)] border border-deep-hull/10 bg-harbour-mist/30 p-5 sm:p-6 flex flex-col gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+                {/* Office Address */}
+                <div className="flex items-start gap-3.5">
+                  <span
+                    aria-hidden="true"
+                    className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] bg-deep-hull text-sea-salt shadow-hull"
+                  >
+                    <MapPin size={18} weight="regular" />
                   </span>
-                  <CopyField
-                    value={mainEmail}
-                    href={`mailto:${mainEmail}`}
-                    theme="light"
-                  />
+                  <div className="min-w-0 flex-1">
+                    <h5 className="font-sans text-[13.5px] font-semibold text-deep-hull">
+                      {bandCopy?.col3_title ?? 'Office Address'}
+                    </h5>
+                    <div className="mt-1 flex items-start justify-between gap-2.5">
+                      <p className="font-sans text-[13.5px] leading-relaxed text-deep-hull/80">
+                        {headOffice?.address}
+                      </p>
+                      {headOffice?.address && (
+                        <button
+                          type="button"
+                          onClick={handleCopyAddress}
+                          aria-label={`Copy ${headOffice.address}`}
+                          className="shrink-0 inline-flex items-center gap-1 rounded-[var(--radius-sm)] border border-deep-hull/15 px-2 py-1 text-xs text-deep-hull/75 transition-colors duration-300 ease-out hover:border-[#00A9CE]/65 hover:text-[#00A9CE] min-h-[30px] cursor-pointer"
+                        >
+                          {addressCopied ? (
+                            <>
+                              <Check size={13} weight="bold" className="text-[#00A9CE]" />
+                              <span className="text-[#00A9CE]">Copied</span>
+                            </>
+                          ) : (
+                            <Copy size={13} weight="regular" />
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              )}
+
+                {/* Phone Lines */}
+                <div className="flex items-start gap-3.5">
+                  <span
+                    aria-hidden="true"
+                    className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] bg-deep-hull text-sea-salt shadow-hull"
+                  >
+                    <Phone size={18} weight="regular" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <h5 className="font-sans text-[13.5px] font-semibold text-deep-hull">
+                      {bandCopy?.col1_title ?? 'Phone Lines'}
+                    </h5>
+                    <div className="mt-1 flex flex-col gap-1.5">
+                      {phones.map((phone) => (
+                        <CopyField
+                          key={phone}
+                          value={phone}
+                          href={`tel:${phone.replace(/\s+/g, '')}`}
+                          theme="light"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* International Line */}
+                <div className="flex items-start gap-3.5">
+                  <span
+                    aria-hidden="true"
+                    className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] bg-deep-hull text-sea-salt shadow-hull"
+                  >
+                    <InternationalPhoneIcon size={20} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <h5 className="font-sans text-[13.5px] font-semibold text-deep-hull">
+                      {bandCopy?.international_title ?? 'International Line'}
+                    </h5>
+                    <div className="mt-1">
+                      <CopyField
+                        value={internationalLine}
+                        href={`tel:${internationalLine.replace(/\s+/g, '')}`}
+                        theme="light"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Email Addresses */}
+                <div className="flex items-start gap-3.5">
+                  <span
+                    aria-hidden="true"
+                    className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] bg-deep-hull text-sea-salt shadow-hull"
+                  >
+                    <At size={18} weight="regular" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <h5 className="font-sans text-[13.5px] font-semibold text-deep-hull">
+                      {bandCopy?.col2_title ?? 'Email Addresses'}
+                    </h5>
+                    <div className="mt-1 flex flex-col gap-1.5">
+                      {emails.map((email) => (
+                        <CopyField
+                          key={email}
+                          value={email}
+                          href={`mailto:${email}`}
+                          theme="light"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {dirCopy?.whatsapp_url && (
-                <div className="pt-2">
+                <div className="border-t border-deep-hull/10 pt-4">
                   <a
                     href={dirCopy.whatsapp_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-signal-blue px-4 py-2.5 font-sans text-xs font-semibold uppercase tracking-[0.06em] text-sea-salt transition-colors hover:bg-deep-teal"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-signal-blue px-4 py-2.5 font-sans text-xs font-semibold uppercase tracking-[0.06em] text-sea-salt transition-colors duration-300 ease-out hover:bg-[#00A9CE]"
                   >
                     <WhatsappLogo size={16} weight="fill" />
                     <span>{dirCopy.whatsapp_label ?? 'WhatsApp us'}</span>
@@ -197,70 +318,11 @@ export function ContactDirectory() {
             </div>
           </section>
 
-          {/* 2. By Department (Sales · Operations · Accounts/Regional Desk) */}
-          {departments.length > 0 && (
-            <section aria-label={dirCopy?.departments_heading ?? 'By department'}>
-              <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.08em] text-deep-hull/55">
-                {dirCopy?.departments_heading ?? 'By department'}
-              </h3>
-
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {departments.map((dept, idx) => {
-                  const isSelected = idx === activeDeptIdx;
-                  return (
-                    <button
-                      key={dept.name}
-                      type="button"
-                      onClick={() => setActiveDeptIdx(idx)}
-                      className={`rounded-full px-3.5 py-1.5 font-sans text-xs font-medium transition-colors ${
-                        isSelected
-                          ? 'bg-deep-hull text-sea-salt'
-                          : 'bg-harbour-mist/50 text-deep-hull/75 hover:text-deep-hull'
-                      }`}
-                    >
-                      {dept.name}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {activeDept && (
-                <div className="mt-2.5 flex flex-col gap-2 rounded-[var(--radius-md)] border border-deep-hull/10 bg-sea-salt p-3.5 shadow-sm">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="font-sans text-xs text-deep-hull/65">
-                      Direct Email
-                    </span>
-                    <CopyField
-                      value={activeDept.email}
-                      href={`mailto:${activeDept.email}`}
-                      theme="light"
-                    />
-                  </div>
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-deep-hull/8 pt-2">
-                    <span className="font-sans text-xs text-deep-hull/65">
-                      Direct Line
-                    </span>
-                    <CopyField
-                      value={activeDept.phone}
-                      href={`tel:${activeDept.phone.replace(/\s+/g, '')}`}
-                      theme="light"
-                    />
-                  </div>
-                </div>
-              )}
-            </section>
-          )}
-
-          {/* 3. By Country (Instant Search + Continent Accordions + "Show on globe" buttons) */}
+          {/* 2. By Country (Collapsed by default, Search + Continent Accordions + Country Flags & Local Times) */}
           <section aria-label={dirCopy?.countries_heading ?? 'By country'}>
-            <div className="flex items-center justify-between">
-              <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.08em] text-deep-hull/55">
-                {dirCopy?.countries_heading ?? 'By country'}
-              </h3>
-              <span className="font-sans text-xs tabular-nums text-deep-hull/55">
-                {NETWORK_DATA.allNodes.length} countries
-              </span>
-            </div>
+            <h4 className="font-sans text-xs font-semibold uppercase tracking-[0.08em] text-deep-hull/55">
+              {dirCopy?.countries_heading ?? 'By country'}
+            </h4>
 
             {/* Instant Search Field */}
             <div className="relative mt-3">
@@ -272,31 +334,27 @@ export function ContactDirectory() {
                 type="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={
-                  dirCopy?.search_placeholder ?? 'Search a country or city…'
-                }
-                aria-label={
-                  dirCopy?.search_placeholder ?? 'Search a country or city'
-                }
-                className="w-full rounded-full border border-deep-hull/15 bg-sea-salt py-2.5 pl-10 pr-9 font-sans text-sm text-deep-hull placeholder:text-deep-hull/45 focus:border-signal-blue focus:outline-none"
+                placeholder="Search a country..."
+                aria-label="Search a country..."
+                className="w-full rounded-full border border-deep-hull/15 bg-sea-salt py-2.5 pl-10 pr-9 font-sans text-sm text-deep-hull placeholder:text-deep-hull/45 transition-colors duration-300 ease-out focus:border-[#00A9CE] focus:outline-none"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
                   aria-label="Clear search"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-deep-hull/50 hover:text-deep-hull"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-deep-hull/50 transition-colors duration-300 ease-out hover:text-[#00A9CE] cursor-pointer"
                 >
                   <X size={14} weight="bold" />
                 </button>
               )}
             </div>
 
-            {/* Continent Accordions */}
+            {/* Continent Accordions (Closed by default) */}
             <div className="mt-3 flex flex-col divide-y divide-deep-hull/10 rounded-[var(--radius-md)] border border-deep-hull/10 bg-sea-salt overflow-hidden">
               {filteredGroups.map((group) => {
                 const isExpanded =
-                  Boolean(trimmedQuery) || Boolean(openContinents[group.continent]);
+                  Boolean(trimmedQuery) || openContinent === group.continent;
 
                 return (
                   <div key={group.continent} className="flex flex-col">
@@ -304,19 +362,11 @@ export function ContactDirectory() {
                       type="button"
                       onClick={() => toggleContinent(group.continent)}
                       aria-expanded={isExpanded}
-                      className="flex w-full items-center justify-between bg-harbour-mist/25 px-4 py-3 text-left transition-colors hover:bg-harbour-mist/45"
+                      className="flex w-full items-center justify-between bg-harbour-mist/25 px-4 py-3 text-left transition-colors duration-300 ease-out hover:bg-harbour-mist/45 cursor-pointer"
                     >
-                      <div className="flex items-center gap-2.5">
-                        <span className="font-display text-base font-medium text-deep-hull">
-                          {group.continent}
-                        </span>
-                        {group.officeCount > 0 && (
-                          <span className="rounded-full bg-signal-blue/12 px-2 py-0.5 font-sans text-[10px] font-semibold text-signal-blue">
-                            {group.officeCount}{' '}
-                            {group.officeCount === 1 ? 'office' : 'offices'}
-                          </span>
-                        )}
-                      </div>
+                      <span className="font-display text-base font-medium text-deep-hull">
+                        {group.continent}
+                      </span>
                       <div className="flex items-center gap-2">
                         <span className="font-sans text-xs tabular-nums text-deep-hull/55">
                           {group.locations.length}
@@ -340,57 +390,37 @@ export function ContactDirectory() {
                               key={loc.id}
                               className="py-3.5 flex flex-col gap-2"
                             >
-                              <div className="flex items-start justify-between gap-2">
-                                <div className="flex items-center gap-2">
-                                  <span
+                              {/* Country Flag + Name + Current Local Time */}
+                              <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <ReactCountryFlag
+                                    countryCode={loc.countryCode}
+                                    svg
                                     aria-hidden="true"
-                                    className={`h-2.5 w-2.5 shrink-0 rounded-full ${
-                                      isOffice
-                                        ? 'bg-signal-blue ring-2 ring-signal-blue/25'
-                                        : 'border-2 border-brass bg-transparent'
-                                    }`}
+                                    className="shrink-0 rounded-[2px] shadow-[0_0_0_1px_rgba(14,34,51,0.1)]"
+                                    style={{
+                                      width: '18px',
+                                      height: '13.5px',
+                                      objectFit: 'cover',
+                                    }}
                                   />
-                                  <div>
-                                    <span className="font-sans text-sm font-semibold text-deep-hull">
-                                      {loc.country}
-                                    </span>
-                                    {loc.city && loc.city !== loc.country && (
-                                      <span className="ml-1.5 font-sans text-xs text-deep-hull/60">
-                                        · {loc.city}
-                                      </span>
-                                    )}
-                                  </div>
+                                  <span className="truncate font-sans text-sm font-semibold text-deep-hull">
+                                    {loc.country}
+                                  </span>
                                 </div>
 
-                                <span
-                                  className={`rounded-full px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wider ${
-                                    isOffice
-                                      ? 'bg-signal-blue/12 text-signal-blue'
-                                      : 'bg-brass/15 text-deep-hull/75'
-                                  }`}
-                                >
-                                  {isOffice
-                                    ? (dirCopy?.office_badge ?? 'Office')
-                                    : (dirCopy?.coverage_badge ?? 'Coverage')}
+                                <span className="shrink-0 font-sans text-xs tabular-nums text-deep-hull/55">
+                                  {getLocalTimeAtLongitude(loc.longitude)}
                                 </span>
                               </div>
 
                               {isOffice && loc.address && (
-                                <p className="pl-4 font-sans text-xs text-deep-hull/70 leading-relaxed">
+                                <p className="pl-[28px] font-sans text-xs text-deep-hull/70 leading-relaxed">
                                   {loc.address}
                                 </p>
                               )}
 
-                              {!isOffice && loc.servingOfficeCity && (
-                                <p className="pl-4 font-sans text-xs text-deep-hull/65">
-                                  {dirCopy?.served_by_prefix ?? 'Served by'}{' '}
-                                  <span className="font-medium text-deep-hull">
-                                    {loc.servingOfficeCity} ({loc.servingOfficeCountry})
-                                  </span>
-                                </p>
-                              )}
-
-                              <div className="pl-4 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+                              <div className="pl-[28px] flex flex-wrap items-center gap-x-4 gap-y-1.5">
                                 {loc.phone && (
                                   <CopyField
                                     value={loc.phone}
@@ -407,11 +437,11 @@ export function ContactDirectory() {
                                 )}
                               </div>
 
-                              <div className="pl-4 pt-1">
+                              <div className="pl-[28px] pt-1">
                                 <button
                                   type="button"
                                   onClick={() => handleShowOnGlobe(loc)}
-                                  className="inline-flex items-center gap-1.5 rounded-full border border-signal-blue/30 bg-signal-blue/5 px-3 py-1 font-sans text-[11px] font-semibold text-signal-blue transition-colors hover:bg-signal-blue hover:text-sea-salt"
+                                  className="inline-flex items-center gap-1.5 rounded-full border border-signal-blue/30 bg-signal-blue/5 px-3 py-1 font-sans text-[11px] font-semibold text-signal-blue transition-colors duration-300 ease-out hover:border-[#00A9CE] hover:bg-[#00A9CE] hover:text-sea-salt cursor-pointer"
                                 >
                                   <GlobeHemisphereWest size={13} weight="duotone" />
                                   <span>

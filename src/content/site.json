@@ -54,7 +54,7 @@
     "head_office_city": "Dubai",
     "head_office_longitude": 55.2708,
     "form_title": "Send an enquiry",
-    "form_endpoint": "",
+    "form_endpoint": "https://formsubmit.co/ajax/info@globalmarinesupplies.com",
     "fields": {
       "email_label": "Email",
       "email_placeholder": "name@company.com",
@@ -66,9 +66,9 @@
       "message_placeholder": "Port of call, ETA, and store or service requirements...",
       "message_error": "Tell us briefly about your vessel's port call or requirements.",
       "attachment_label": "Attach a file (optional)",
-      "attachment_hint": "PDF, XLSX, CSV, DOC or image up to 10 MB",
+      "attachment_hint": "PDF, XLSX, CSV, DOC or image up to 5 MB",
       "attachment_remove_label": "Remove file",
-      "attachment_error_size": "File exceeds the 10 MB limit. Please attach a smaller file or email it directly.",
+      "attachment_error_size": "File exceeds the 5 MB limit. Please attach a smaller file or email it directly.",
       "attachment_error_type": "Accepted formats: PDF, Excel (.xlsx, .xls, .csv), Word (.doc, .docx), or image."
     },
     "submit": {
@@ -141,7 +141,7 @@
       }
     ],
     "countries_heading": "By country",
-    "search_placeholder": "Search a country or city…",
+    "search_placeholder": "Search a country...",
     "show_on_globe_label": "Show on globe",
     "office_badge": "Office",
     "coverage_badge": "Coverage",
