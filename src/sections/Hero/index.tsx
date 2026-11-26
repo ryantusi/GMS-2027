@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode, type PointerEvent } from 'react';
-import { GlobeHemisphereWest } from '@phosphor-icons/react';
+import { GlobeHemisphereWest, ChatCircleDots } from '@phosphor-icons/react';
 import { gsap, ScrollTrigger, useGSAP, MOTION } from '../../lib/scroll';
 import { scrollToTarget } from '../../lib/lenis';
 import { useAppStore } from '../../lib/store';
@@ -138,10 +138,11 @@ export function Hero() {
   const frameEngineRef = useRef<FrameSequenceHandle>(null);
 
   const heroLogoAnchorRef = useRef<HTMLDivElement>(null);
-  const goldenCueRef = useRef<HTMLDivElement>(null);
   const titleLockupRef = useRef<HTMLDivElement>(null);
   const buttonsRowRef = useRef<HTMLDivElement>(null);
   const pillRef = useRef<HTMLDivElement>(null);
+  const scrollCueRef = useRef<HTMLDivElement>(null);
+  const bgContainerRef = useRef<HTMLDivElement>(null);
 
   // Apple-style Bento Grid Showcase Refs
   const bentoGridRef = useRef<HTMLDivElement>(null);
@@ -189,7 +190,6 @@ export function Hero() {
 
           const navLogoSlot = document.getElementById('navbar-logo-slot');
           const navbarBgLayer = document.getElementById('navbar-bg-layer');
-          const floatingPill = document.getElementById('floating-contact-pill-wrap');
 
           if (reduceMotion) {
             setHeroPinned(false);
@@ -200,39 +200,11 @@ export function Hero() {
             if (navbarBgLayer) {
               gsap.set(navbarBgLayer, { autoAlpha: 1 });
             }
-            if (floatingPill) {
-              gsap.set(floatingPill, { x: 0, y: 0, clearProps: 'transform' });
-            }
             if (bentoGridRef.current) {
               gsap.set(bentoGridRef.current, { autoAlpha: 1, yPercent: 0 });
             }
             return;
           }
-
-          // Compute delta between docked floating pill and hero contact anchor (aligned with Button 1)
-          let cachedContactDelta: { x: number; y: number } | null = null;
-          const computeContactDelta = (force = false) => {
-            if (cachedContactDelta && !force) return cachedContactDelta;
-            const btn1 = document.getElementById('hero-explore-btn');
-            const pill = document.getElementById('floating-contact-pill-wrap');
-            if (!btn1 || !pill) return { x: 0, y: 0 };
-
-            const savedTransform = pill.style.transform;
-            pill.style.transform = 'none';
-            const btn1Rect = btn1.getBoundingClientRect();
-            const pillRect = pill.getBoundingClientRect();
-            pill.style.transform = savedTransform;
-
-            // Align precisely with Button 1: exact top / vertical center and gap
-            const targetY = btn1Rect.top + (btn1Rect.height - pillRect.height) / 2;
-            const targetX = btn1Rect.right + (window.innerWidth >= 640 ? 14 : 12);
-
-            cachedContactDelta = {
-              x: targetX - pillRect.left,
-              y: targetY - pillRect.top,
-            };
-            return cachedContactDelta;
-          };
 
           // Compute delta and scale for the single traveling logo journey
           let cachedLogoJourney: { x: number; y: number; scale: number } | null = null;
@@ -268,15 +240,6 @@ export function Hero() {
             return cachedLogoJourney;
           };
 
-          // Place floating contact pill at hero anchor initially
-          if (floatingPill) {
-            const initialDelta = computeContactDelta(true);
-            gsap.set(floatingPill, {
-              x: initialDelta.x,
-              y: initialDelta.y,
-            });
-          }
-
           // Initial position for the single traveling logo at the Hero anchor (scaled large)
           if (navLogoSlot && heroLogoAnchorRef.current) {
             const initialLogo = computeLogoJourney(true);
@@ -308,9 +271,9 @@ export function Hero() {
                 0
               );
             }
-            if (goldenCueRef.current) {
+            if (scrollCueRef.current) {
               tlEntrance.fromTo(
-                goldenCueRef.current,
+                scrollCueRef.current,
                 { autoAlpha: 0, y: 12 },
                 { autoAlpha: 1, y: 0, duration: 0.8 },
                 0.1
@@ -357,7 +320,6 @@ export function Hero() {
           // Resize handler to recalculate coordinates cleanly
           const handleResize = () => {
             computeLogoJourney(true);
-            computeContactDelta(true);
             ScrollTrigger.refresh();
           };
           window.addEventListener('resize', handleResize);
@@ -377,12 +339,8 @@ export function Hero() {
               invalidateOnRefresh: true,
               onRefreshInit: () => {
                 cachedLogoJourney = null;
-                cachedContactDelta = null;
                 if (navLogoSlot) {
                   gsap.set(navLogoSlot, { x: 0, y: 0, scale: 1 });
-                }
-                if (floatingPill) {
-                  gsap.set(floatingPill, { x: 0, y: 0 });
                 }
                 if (progBar1Ref.current) gsap.set(progBar1Ref.current, { backgroundColor: '#0284c7' });
                 if (progBar2Ref.current) gsap.set(progBar2Ref.current, { backgroundColor: '#e2e8f0' });
@@ -414,6 +372,15 @@ export function Hero() {
               },
             },
           });
+
+          if (scrollCueRef.current) {
+            tl.fromTo(
+              scrollCueRef.current,
+              { autoAlpha: 1 },
+              { autoAlpha: 0, duration: 8, ease: 'power1.out' },
+              18
+            );
+          }
 
           // 0 -> 95: Scrub frame sequence from first frame to final sunlit aqua frame
           tl.to(
@@ -470,28 +437,8 @@ export function Hero() {
             );
           }
 
-          // 0 -> 30%: Floating contact pill scrubs from hero button row to bottom-right fixed dock
-          if (floatingPill) {
-            tl.fromTo(
-              floatingPill,
-              {
-                x: () => computeContactDelta().x,
-                y: () => computeContactDelta().y,
-              },
-              {
-                x: 0,
-                y: 0,
-                duration: 30,
-                ease: 'power1.inOut',
-                immediateRender: true,
-              },
-              0
-            );
-          }
-
           // 0 -> 18%: Hero copy and badges fade out gently and drift slightly upward
           const heroContentGroup = [
-            goldenCueRef.current,
             titleLockupRef.current,
             buttonsRowRef.current,
             pillRef.current,
@@ -528,12 +475,12 @@ export function Hero() {
 
           // 38 -> 52%: Stage 1 holds (Part 1 + Image 1) in view
 
-          // 52 -> 62%: Wipe 1 (Image 2 wipes bottom-to-top, Para 1 crossfades to Para 2)
+          // 52 -> 60%: Fade in Image 2 (crossfade)
           if (carouselImg2Ref.current) {
             tl.fromTo(
               carouselImg2Ref.current,
-              { clipPath: 'inset(100% 0% 0% 0%)' },
-              { clipPath: 'inset(0% 0% 0% 0%)', duration: 10, ease: 'power1.inOut' },
+              { autoAlpha: 0 },
+              { autoAlpha: 1, duration: 8, ease: 'power1.inOut' },
               52
             );
           }
@@ -560,12 +507,12 @@ export function Hero() {
 
           // 62 -> 74%: Stage 2 holds (Part 2 + Image 2) in view
 
-          // 74 -> 84%: Wipe 2 (Image 3 wipes bottom-to-top, Para 2 crossfades to Para 3)
+          // 74 -> 82%: Fade in Image 3 (crossfade)
           if (carouselImg3Ref.current) {
             tl.fromTo(
               carouselImg3Ref.current,
-              { clipPath: 'inset(100% 0% 0% 0%)' },
-              { clipPath: 'inset(0% 0% 0% 0%)', duration: 10, ease: 'power1.inOut' },
+              { autoAlpha: 0 },
+              { autoAlpha: 1, duration: 8, ease: 'power1.inOut' },
               74
             );
           }
@@ -590,13 +537,17 @@ export function Hero() {
               .to(progBar3Ref.current, { backgroundColor: '#0284c7', duration: 4 }, 77);
           }
 
-          // 82 -> 93%: White overlay rises a while before the image sequence ends (at 95%), dissolving the background smoothly to white
-          if (seaSaltVeilRef.current) {
+          // 75 -> 95%: Smooth continuous crossfade from background video/sequence to Sea Salt light background
+          if (seaSaltVeilRef.current && bgContainerRef.current) {
             tl.fromTo(
               seaSaltVeilRef.current,
-              { yPercent: 60, autoAlpha: 0 },
-              { yPercent: 0, autoAlpha: 1, duration: 11, ease: 'power1.inOut' },
-              82
+              { autoAlpha: 0 },
+              { autoAlpha: 1, duration: 20, ease: 'power1.inOut' },
+              75
+            ).to(
+              bgContainerRef.current,
+              { autoAlpha: 0, duration: 20, ease: 'power1.inOut' },
+              75
             );
           }
 
@@ -612,9 +563,6 @@ export function Hero() {
           }
 
           return () => {
-            if (floatingPill) {
-              gsap.set(floatingPill, { clearProps: 'transform' });
-            }
             if (navLogoSlot) {
               gsap.set(navLogoSlot, { clearProps: 'transform,transformOrigin' });
             }
@@ -625,10 +573,10 @@ export function Hero() {
               gsap.set(bentoGridRef.current, { clearProps: 'all' });
             }
             if (carouselImg2Ref.current) {
-              gsap.set(carouselImg2Ref.current, { clearProps: 'clipPath' });
+              gsap.set(carouselImg2Ref.current, { clearProps: 'opacity,visibility' });
             }
             if (carouselImg3Ref.current) {
-              gsap.set(carouselImg3Ref.current, { clearProps: 'clipPath' });
+              gsap.set(carouselImg3Ref.current, { clearProps: 'opacity,visibility' });
             }
             if (progBar1Ref.current) {
               gsap.set(progBar1Ref.current, { clearProps: 'backgroundColor' });
@@ -661,7 +609,7 @@ export function Hero() {
       className="relative h-[100dvh] w-full overflow-hidden bg-deep-hull text-white select-none"
     >
       {/* Layer 1: Full-Viewport Frame Sequence & Idle Video Loop */}
-      <div className="absolute inset-0 z-0 bg-deep-hull">
+      <div ref={bgContainerRef} className="absolute inset-0 z-0 bg-deep-hull">
         <FrameSequence
           ref={frameEngineRef}
           desktopDir={media?.desktop_frames_dir ?? '/frames/hero/desktop'}
@@ -674,8 +622,8 @@ export function Hero() {
         />
       </div>
 
-      {/* Layer 2: Primary Hero Content — Centered vertically in viewport, aligned on the left */}
-      <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl flex-col justify-center items-start px-6 sm:px-10 md:px-12 lg:px-16 text-left">
+      {/* Layer 2: Primary Hero Content — Centered vertically in viewport, aligned on the left with balanced breathing room */}
+      <div className="relative z-10 flex h-full w-full max-w-7xl flex-col justify-center items-start pl-6 sm:pl-10 md:pl-14 lg:pl-18 xl:pl-24 pr-6 sm:pr-10 md:pr-12 lg:pr-16 text-left">
         <div className="flex flex-col items-start text-left max-w-3xl">
           {/* Brand Logo Anchor: Defines slightly smaller starting size for the single traveling logo.
               The #navbar-logo-slot element begins here, and glides into the Navbar on scroll. */}
@@ -685,17 +633,6 @@ export function Hero() {
             aria-hidden="true"
             className="mb-5 sm:mb-6 h-16 sm:h-20 md:h-24 lg:h-28 xl:h-30 w-auto max-w-[260px] sm:max-w-[320px] md:max-w-[360px] lg:max-w-[400px] pointer-events-none select-none"
           />
-
-          {/* Long Golden Scroll Cue directly beneath Logo, left-aligned */}
-          <div ref={goldenCueRef} className="mb-5 sm:mb-6 flex items-center justify-start gap-3">
-            <span
-              aria-hidden="true"
-              className="h-[2px] w-16 sm:w-24 md:w-28 lg:w-32 rounded-full bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#F3E5AB] shadow-[0_0_8px_rgba(212,175,55,0.7)]"
-            />
-            <span className="font-sans text-[11px] sm:text-xs font-bold tracking-[0.18em] text-[#F3E5AB] uppercase drop-shadow-md">
-              SCROLL TO EXPLORE
-            </span>
-          </div>
 
           {/* Integrated Heading & Subheading Lockup (as in inspiration reference), left-aligned */}
           <div
@@ -735,17 +672,17 @@ export function Hero() {
             </div>
           </div>
 
-          {/* Action Buttons Row: Perfectly aligned Button 1 & Floating Contact Button Anchor */}
+          {/* Action Buttons Row: Explore Our Locations (Blue Gradient) & Contact Us */}
           <div
             ref={buttonsRowRef}
             className="mt-6 sm:mt-8 flex flex-nowrap items-center justify-start gap-3 sm:gap-3.5"
           >
-            {/* Button 1: Golden gradient button, smoothly transparent on hover, scrolls to network */}
+            {/* Button 1: Theme Blue Gradient Button */}
             <button
               id="hero-explore-btn"
               type="button"
               onClick={() => scrollToTarget('#network')}
-              className="group relative flex h-[42px] items-center gap-2 sm:gap-2.5 rounded-full px-4 sm:px-4.5 font-sans text-xs sm:text-[13px] font-bold tracking-wide transition-all duration-300 shadow-[0_4px_24px_rgba(212,175,55,0.45)] bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#F3E5AB] text-night-port border border-[#F3E5AB]/80 hover:bg-none hover:bg-transparent hover:text-white hover:border-[#D4AF37] hover:shadow-[0_0_24px_rgba(212,175,55,0.6)] cursor-pointer shrink-0"
+              className="group relative flex h-[42px] items-center gap-2 sm:gap-2.5 rounded-full px-4 sm:px-4.5 font-sans text-xs sm:text-[13px] font-bold tracking-wide transition-all duration-300 shadow-[0_4px_24px_rgba(11,94,142,0.45)] bg-gradient-to-r from-[#005268] via-[#0B5E8E] to-[#03C5EC] text-white border border-[#03C5EC]/60 hover:bg-none hover:bg-transparent hover:border-[#03C5EC] hover:shadow-[0_0_24px_rgba(3,197,236,0.6)] cursor-pointer shrink-0"
             >
               <span>Explore Our Locations</span>
               <GlobeHemisphereWest
@@ -755,23 +692,31 @@ export function Hero() {
               />
             </button>
 
-            {/* Button 2 Anchor: Contact Us floating button sits here at scroll 0 and scrubs to bottom-right on scroll */}
-            <div
-              id="hero-contact-anchor"
-              className="h-[42px] min-w-[125px] sm:min-w-[135px] shrink-0 pointer-events-none"
-            />
+            {/* Button 2: Contact Us Button */}
+            <button
+              type="button"
+              onClick={() => useAppStore.getState().setActiveDialog('directory')}
+              aria-haspopup="dialog"
+              className="group flex h-[42px] items-center gap-2 rounded-full px-4 sm:px-4.5 font-sans text-xs sm:text-[13px] font-semibold tracking-wide border border-white/40 bg-white/15 hover:bg-white/25 text-white backdrop-blur-md transition-all duration-300 shadow-md cursor-pointer shrink-0"
+            >
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[#F3E5AB]">
+                <ChatCircleDots size={14} weight="duotone" />
+              </span>
+              <span>Contact Us</span>
+            </button>
           </div>
 
-          {/* Memberships Logos below the buttons: Crisp solid white background, tight spacing & larger logos */}
+          {/* Memberships Logos below the buttons: Crisp solid white background, tight spacing & balanced sizes */}
           {pillItems.length > 0 && (
             <div
               ref={pillRef}
-              className="mt-4 sm:mt-5 inline-flex flex-nowrap items-center justify-start gap-1 sm:gap-1.5 md:gap-2 rounded-2xl bg-white shadow-xl border border-white px-4 sm:px-5 py-2 sm:py-2.5"
+              className="mt-4 sm:mt-5 inline-flex flex-nowrap items-center justify-start gap-1.5 sm:gap-2 md:gap-2.5 rounded-2xl bg-white shadow-xl border border-white px-4 sm:px-5 py-2 sm:py-2.5"
             >
               {pillItems.map((item) => {
                 const showTextFallback = !item.logo || failedLogos[item.name];
+                const isShipServe = item.name.toLowerCase().includes('ship') || (item.logo && item.logo.includes('Ship-Serve'));
                 return (
-                  <span key={item.name} className="inline-flex items-center shrink-0">
+                  <span key={item.name} className="inline-flex items-center shrink-0 px-0.5">
                     {showTextFallback ? (
                       <span className="font-sans text-xs sm:text-sm font-semibold tracking-wide text-deep-hull whitespace-nowrap">
                         {item.name}
@@ -783,7 +728,7 @@ export function Hero() {
                         onError={() =>
                           setFailedLogos((prev) => ({ ...prev, [item.name]: true }))
                         }
-                        className="h-9 sm:h-10 md:h-11 lg:h-12 w-auto object-contain filter drop-shadow-sm"
+                        className={isShipServe ? "h-7 sm:h-8 md:h-9 w-auto object-contain filter drop-shadow-sm" : "h-9 sm:h-10 md:h-11 lg:h-12 w-auto object-contain filter drop-shadow-sm"}
                       />
                     )}
                   </span>
@@ -791,6 +736,19 @@ export function Hero() {
               })}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Center-Bottom Simplistic Scroll Indicator with Proper Line Animation */}
+      <div
+        ref={scrollCueRef}
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5 text-white/80 pointer-events-none select-none"
+      >
+        <span className="font-sans text-[10px] sm:text-[11px] font-semibold tracking-[0.24em] uppercase text-white/90">
+          Scroll to Explore
+        </span>
+        <div className="w-[1.5px] h-7 bg-white/20 overflow-hidden relative rounded-full">
+          <div className="absolute inset-x-0 top-0 h-full bg-gradient-to-b from-transparent via-white to-transparent animate-[scrollLine_2s_cubic-bezier(0.77,0,0.175,1)_infinite]" />
         </div>
       </div>
 
@@ -814,11 +772,10 @@ export function Hero() {
               className="absolute inset-0 w-full h-full object-cover select-none"
             />
 
-            {/* Image 2 (Bottom-to-Top Wipe): Technical & Deck Stores */}
+            {/* Image 2 (Fade Crossfade): Technical & Deck Stores */}
             <div
               ref={carouselImg2Ref}
-              className="absolute inset-0 w-full h-full overflow-hidden will-change-[clip-path]"
-              style={{ clipPath: 'inset(100% 0% 0% 0%)' }}
+              className="absolute inset-0 w-full h-full overflow-hidden opacity-0"
             >
               <img
                 src="/hero/chandlery_technical.jpg"
@@ -827,11 +784,10 @@ export function Hero() {
               />
             </div>
 
-            {/* Image 3 (Bottom-to-Top Wipe): Modern Port Warehouse */}
+            {/* Image 3 (Fade Crossfade): Modern Port Warehouse */}
             <div
               ref={carouselImg3Ref}
-              className="absolute inset-0 w-full h-full overflow-hidden will-change-[clip-path]"
-              style={{ clipPath: 'inset(100% 0% 0% 0%)' }}
+              className="absolute inset-0 w-full h-full overflow-hidden opacity-0"
             >
               <img
                 src="/hero/chandlery_warehouse.jpg"

@@ -18,7 +18,8 @@
       { "name": "ISSA", "logo": "/logos/ISSA.png" },
       { "name": "ISO 9001", "logo": "/logos/ISO9001.png" },
       { "name": "ISO 22000", "logo": "/logos/ISO22000.png" },
-      { "name": "Procureship", "logo": "/logos/procureship.png" }
+      { "name": "Procureship", "logo": "/logos/procureship.png" },
+      { "name": "Shipserve", "logo": "/logos/Ship-Serve.png" }
     ]
   }
 }

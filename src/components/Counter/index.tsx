@@ -72,7 +72,15 @@ export function Counter({
             scrollTrigger: {
               trigger: containerRef.current,
               start: 'top 85%',
-              once: true,
+              toggleActions: 'restart reset restart reset',
+              onLeave: () => {
+                proxy.val = 0;
+                el.textContent = `0${parsedSuffix}`;
+              },
+              onLeaveBack: () => {
+                proxy.val = 0;
+                el.textContent = `0${parsedSuffix}`;
+              },
             },
             onUpdate: () => {
               const current = Math.round(proxy.val);

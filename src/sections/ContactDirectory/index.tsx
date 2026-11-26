@@ -54,9 +54,10 @@ export function ContactDirectory() {
     Africa: true,
   });
 
-  // Display floating pill from Hero through all sections, hiding only during Preloader, Contact section, or when mobile menu / dialog is active
+  // Display floating pill after Hero through all sections, hiding during Preloader, Hero pinned, Contact section, or when mobile menu / dialog is active
   const isPillVisible =
     isPreloaded &&
+    !isHeroPinned &&
     !isContactVisible &&
     !isMobileMenuOpen &&
     activeDialog === null;

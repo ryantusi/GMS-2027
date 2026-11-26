@@ -546,7 +546,7 @@ export function Memberships() {
       data-section="memberships"
       data-nav-theme="light"
       aria-label={sectionCopy?.heading ?? 'Our Memberships'}
-      className="relative w-full overflow-hidden bg-sea-salt text-deep-hull pt-14 pb-28 sm:pt-18 sm:pb-32 md:pt-20 md:pb-40"
+      className="relative w-full overflow-hidden bg-sea-salt text-deep-hull pt-4 pb-28 sm:pt-6 sm:pb-32 md:pt-8 md:pb-40"
     >
       {/* Subtle bottom-edge dissolve band bridging cleanly into Deep Hull Stores */}
       <div

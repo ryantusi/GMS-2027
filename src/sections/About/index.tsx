@@ -112,7 +112,7 @@ export function About() {
       data-section="about"
       data-nav-theme="light"
       aria-label={about?.eyebrow ?? 'About Global Marine Supplies'}
-      className="relative z-20 motion-safe:-mt-[22vh] motion-safe:sm:-mt-[26vh] motion-safe:md:-mt-[30vh] w-full bg-sea-salt text-deep-hull pt-2 pb-12 md:pt-4 md:pb-16"
+      className="relative z-20 motion-safe:-mt-[22vh] motion-safe:sm:-mt-[26vh] motion-safe:md:-mt-[30vh] w-full bg-sea-salt text-deep-hull pt-2 pb-4 md:pt-4 md:pb-6"
     >
       <div className="mx-auto w-full max-w-7xl px-6 sm:px-10 md:px-12 lg:px-16">
         {/* Minimalist Architectural Counter Bar with Vertical Dividers */}
