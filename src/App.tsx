@@ -20,7 +20,6 @@ import { WhyUs } from './sections/WhyUs';
 import { Sectors } from './sections/Sectors';
 import { Network } from './sections/Network';
 import { Contact } from './sections/Contact';
-import { Footer } from './sections/Footer';
 import { ContactDirectory } from './sections/ContactDirectory';
 
 export default function App() {
@@ -83,7 +82,6 @@ export default function App() {
         <Contact />
       </main>
 
-      <Footer />
       <ContactDirectory />
     </div>
   );

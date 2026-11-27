@@ -498,7 +498,7 @@ export function WhyUs() {
       data-section="why-us"
       data-nav-theme="light"
       aria-label={sectionCopy?.heading ?? 'Why Choose Us?'}
-      className="relative min-h-[100dvh] w-full flex items-center bg-sea-salt text-deep-hull pt-20 pb-8 md:pt-20 md:pb-8 overflow-hidden"
+      className="relative min-h-[100dvh] w-full flex items-center bg-sea-salt text-deep-hull pt-16 pb-6 md:pt-[72px] md:pb-4 overflow-hidden"
     >
       <div className="mx-auto w-full max-w-7xl px-6 sm:px-10 md:px-12 lg:px-16">
         {/* Centered Header Lockup */}

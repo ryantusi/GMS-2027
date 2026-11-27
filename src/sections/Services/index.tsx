@@ -836,18 +836,40 @@ export function Services() {
             });
             gsap.set(titleSplit.lines, { yPercent: 112, autoAlpha: 0 });
           }
-          if (titleWrapRef.current) {
-            // Start large in the centre of the viewport
+          const initialScale = isMobile
+            ? 1.14
+            : isXlDesktop
+              ? 1.62
+              : isWideDesktop
+                ? 1.42
+                : 1.26;
+
+          let centerOffsetY = 0;
+          const computeCenterOffsetY = () => {
+            if (!titleWrapRef.current) return 0;
             gsap.set(titleWrapRef.current, {
-              y: isMobile ? '14vh' : isWideDesktop ? '18vh' : '16vh',
-              scale: isMobile
-                ? 1.14
-                : isXlDesktop
-                  ? 1.72
-                  : isWideDesktop
-                    ? 1.45
-                    : 1.28,
-              transformOrigin: 'center top',
+              y: 0,
+              scale: 1,
+              transformOrigin: 'center center',
+            });
+            const sRect = section.getBoundingClientRect();
+            const tRect = titleWrapRef.current.getBoundingClientRect();
+            const vh = sRect.height || window.innerHeight;
+            const navH = window.innerWidth >= 768 ? 72 : 64;
+            const localCenterY = tRect.top - sRect.top + tRect.height / 2;
+            const visualCenterY = navH + (vh - navH) * 0.48;
+            centerOffsetY = Math.max(0, visualCenterY - localCenterY);
+            return centerOffsetY;
+          };
+
+          computeCenterOffsetY();
+
+          if (titleWrapRef.current) {
+            // Start large in the exact visual centre of the viewport
+            gsap.set(titleWrapRef.current, {
+              y: () => centerOffsetY,
+              scale: initialScale,
+              transformOrigin: 'center center',
             });
           }
           if (descRef.current) {
@@ -912,6 +934,9 @@ export function Services() {
               pin: true,
               scrub: MOTION.scrub,
               invalidateOnRefresh: true,
+              onRefreshInit: () => {
+                computeCenterOffsetY();
+              },
             },
           });
 
@@ -930,15 +955,17 @@ export function Services() {
             );
           }
 
-          // 15–30%: It makes room — moves up toward the top and scales down (~58%); description fades in
+          // 15–30%: It makes room — moves up from the centre toward the top and scales down; description fades in
           if (titleWrapRef.current) {
-            tl.to(
+            tl.fromTo(
               titleWrapRef.current,
+              { y: () => centerOffsetY, scale: initialScale },
               {
                 y: 0,
                 scale: 1,
                 duration: 15,
                 ease: 'power2.inOut',
+                immediateRender: true,
               },
               15
             );
@@ -1052,12 +1079,12 @@ export function Services() {
           ref={headerStageRef}
           className="relative z-20 mx-auto max-w-3xl text-center pt-1 md:pt-2"
         >
-          {servicesCopy?.eyebrow && (
-            <p className="mb-2 font-sans text-xs font-semibold uppercase tracking-[0.14em] text-signal-blue">
-              {servicesCopy.eyebrow}
-            </p>
-          )}
           <div ref={titleWrapRef} className="mx-auto max-w-2xl will-change-transform">
+            {servicesCopy?.eyebrow && (
+              <p className="mb-2 font-sans text-xs font-semibold uppercase tracking-[0.14em] text-signal-blue">
+                {servicesCopy.eyebrow}
+              </p>
+            )}
             <h2
               ref={titleRef}
               className="font-display text-[length:clamp(1.65rem,2.75vw,2.45rem)] font-normal tracking-[-0.02em] text-deep-hull leading-[1.24] text-balance"

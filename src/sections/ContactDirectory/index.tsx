@@ -38,7 +38,6 @@ export function ContactDirectory() {
 
   const isPreloaded = useAppStore((s) => s.isPreloaded);
   const isHeroPinned = useAppStore((s) => s.isHeroPinned);
-  const isContactVisible = useAppStore((s) => s.isContactVisible);
   const isMobileMenuOpen = useAppStore((s) => s.isMobileMenuOpen);
   const bottomTheme = useAppStore((s) => s.bottomTheme);
   const activeDialog = useAppStore((s) => s.activeDialog);
@@ -63,11 +62,10 @@ export function ContactDirectory() {
   const [openContinent, setOpenContinent] = useState<string | null>(null);
   const [addressCopied, setAddressCopied] = useState(false);
 
-  // Display floating pill after Hero through all sections, hiding during Preloader, Hero pinned, Contact section, or when mobile menu / dialog is active
+  // Display floating pill after Hero through all sections (including Contact), hiding during Preloader, Hero pinned, or when mobile menu / dialog is active
   const isPillVisible =
     isPreloaded &&
     !isHeroPinned &&
-    !isContactVisible &&
     !isMobileMenuOpen &&
     activeDialog === null;
 

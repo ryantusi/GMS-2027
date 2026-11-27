@@ -452,6 +452,11 @@ export function Navbar() {
         return;
       }
 
+      if (sectionId === 'stores' || sectionId === 'why-us' || sectionId === 'contact') {
+        scrollToTarget(`#${sectionId}`, { offset: 0 });
+        return;
+      }
+
       scrollToTarget(`#${sectionId}`, { offset });
     };
 
@@ -472,7 +477,6 @@ export function Navbar() {
 
   const handleRequestQuote = (e: React.MouseEvent) => {
     e.preventDefault();
-    const offset = window.innerWidth >= 768 ? -72 : -64;
     const focusFirstField = () => {
       const firstField = document.querySelector<HTMLElement>(
         '#contact input, #contact textarea'
@@ -483,10 +487,10 @@ export function Navbar() {
     if (isMobileMenuOpen) {
       setMobileMenuOpen(false);
       window.setTimeout(() => {
-        scrollToTarget('#contact', { offset, onComplete: focusFirstField });
+        scrollToTarget('#contact', { offset: 0, onComplete: focusFirstField });
       }, 320);
     } else {
-      scrollToTarget('#contact', { offset, onComplete: focusFirstField });
+      scrollToTarget('#contact', { offset: 0, onComplete: focusFirstField });
     }
   };
 

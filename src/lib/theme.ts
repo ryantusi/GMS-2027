@@ -52,6 +52,11 @@ export function initThemeObserver(root: HTMLElement | Document = document): () =
         const currentTheme = (section.getAttribute('data-nav-theme') as NavTheme) || 'light';
         useAppStore.getState().setBottomTheme(currentTheme);
       },
+      onLeaveBack: () => {
+        if (sectionId === 'footer') {
+          useAppStore.getState().setBottomTheme('light');
+        }
+      },
     });
 
     triggers.push(bottomTrigger);

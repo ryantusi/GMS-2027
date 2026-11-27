@@ -32,13 +32,13 @@ export function Footer() {
       id="footer"
       data-section="footer"
       data-nav-theme="dark"
-      className="relative w-full min-h-[164px] md:min-h-[176px] overflow-hidden bg-[#005268] text-sea-salt select-none"
+      className="relative w-full min-h-[128px] md:min-h-[140px] overflow-hidden bg-[#005268] text-sea-salt select-none"
     >
       {/* Interactive Silky Ocean Wave Canvas + Undulating Top Crest */}
       <OceanWaveCanvas interactionRootRef={footerRef} />
 
       {/* Minimalist Foreground Content (pointer-events-none so hover ripples water everywhere) */}
-      <div className="pointer-events-none relative z-10 mx-auto w-full max-w-6xl px-6 md:px-12 pt-12 pb-8 md:pt-14 md:pb-9">
+      <div className="pointer-events-none relative z-10 mx-auto w-full max-w-6xl px-6 md:px-12 pt-9 pb-5 md:pt-10 md:pb-6">
         <div className="flex flex-col sm:grid sm:grid-cols-[44px_1fr_44px] items-center gap-4 sm:gap-6">
           {/* Left: Minimalist Upward Arrow Back-to-Top Button */}
           <div className="flex items-center justify-center sm:justify-start">

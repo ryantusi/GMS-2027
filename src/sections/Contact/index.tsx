@@ -11,10 +11,10 @@ import {
   At,
   Paperclip,
   X,
-  ChatCircleDots,
 } from '@phosphor-icons/react';
 import { gsap, useGSAP } from '../../lib/scroll';
 import { useAppStore } from '../../lib/store';
+import { Footer } from '../Footer';
 import siteData from '../../content/site.json';
 
 type SubmitState = 'idle' | 'sending' | 'sent' | 'error';
@@ -91,29 +91,29 @@ const ACCEPTED_MIME_TYPES = [
 const ACCEPTED_EXTENSIONS = /\.(pdf|xls|xlsx|csv|doc|docx|jpg|jpeg|png|webp)$/i;
 
 /**
- * Section 10: Contact (Light Editorial Split — Viewport-Fitted)
+ * Section 10: Contact & Footer (Light Editorial Split — Unified Single-Screen Layout)
  * - Theme: Light Sea Salt (`--sea-salt`), Deep Hull ink (`--deep-hull`), `data-nav-theme="light"`.
- * - Sized to fit cleanly inside a single desktop viewport without vertical overflow.
- * - Left column: Editorial heading, structured Deep Hull icon rows (Office Address, Phone Lines,
- *   Email Addresses with smooth aqua-blue hover states), and a clean bottom-left looping video
- *   frame (`/contact/contact.mp4`) with a subtle dark tint.
- * - Right column: Compact elevated white enquiry card preserving all existing fields (Name,
- *   Company/Vessel, Email, Phone, Message, optional RFQ file attachment), inline validation,
- *   store prefill, and multi-state submit button.
+ * - Sized so the contact channels, enquiry form, and ocean footer fit together inside one screen.
+ * - Left column: Editorial heading and structured Deep Hull icon rows (Office Address, Phone Lines,
+ *   International Line, Email Addresses with smooth aqua-blue hover states).
+ * - Right column: Elevated white enquiry card with Email + Subject in one row, Message details,
+ *   optional RFQ file attachment, inline validation, store prefill, and multi-state submit button.
+ * - Bottom: Integrated interactive Ocean Footer anchored directly beneath the contact grid.
  */
 export function Contact() {
   const sectionRef = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const formCardRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const submitBtnRef = useRef<HTMLButtonElement>(null);
   const checkPathRef = useRef<SVGPathElement>(null);
 
   const emailInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pendingIframeSubmitRef = useRef(false);
+  const iframeTimeoutRef = useRef<number | null>(null);
 
   const prefilledStoreEnquiry = useAppStore((s) => s.prefilledStoreEnquiry);
   const setPrefilledStoreEnquiry = useAppStore((s) => s.setPrefilledStoreEnquiry);
-  const setActiveDialog = useAppStore((s) => s.setActiveDialog);
 
   const [reduceMotion, setReduceMotion] = useState(false);
   const [values, setValues] = useState<FormValues>({
@@ -132,14 +132,16 @@ export function Contact() {
   const fieldsCopy = contactCopy?.fields;
   const submitCopy = contactCopy?.submit;
   const bandCopy = contactCopy?.details_band;
-  const mediaCopy = contactCopy?.media;
   const officesInfo = siteData?.contact_and_offices;
   const emails = officesInfo?.emails ?? [];
   const phones = officesInfo?.phones ?? [];
   const internationalLine = officesInfo?.international_line ?? '+1 945 9972408';
   const headOffice = officesInfo?.head_office;
   const opsEmail = emails[0] ?? 'info@globalmarinesupplies.com';
-  const loopVideoUrl = mediaCopy?.loop_video ?? '/contact/contact.mp4';
+  const ajaxEndpoint =
+    contactCopy?.form_endpoint?.trim() ||
+    'https://formsubmit.co/ajax/info@globalmarinesupplies.com';
+  const standardEndpoint = ajaxEndpoint.replace(/\/ajax\//i, '/');
 
   // Detect reduced motion preference via gsap.matchMedia()
   useGSAP(
@@ -158,17 +160,6 @@ export function Contact() {
     },
     { scope: sectionRef }
   );
-
-  // Respect prefers-reduced-motion on the looping ambient video
-  useEffect(() => {
-    const vid = videoRef.current;
-    if (!vid) return;
-    if (reduceMotion) {
-      vid.pause();
-    } else {
-      vid.play().catch(() => {});
-    }
-  }, [reduceMotion]);
 
   // Pre-fill subject and message and focus Email when visitor arrives from a Store's "Request" button
   useEffect(() => {
@@ -292,6 +283,24 @@ export function Contact() {
     );
   };
 
+  useEffect(() => {
+    return () => {
+      if (iframeTimeoutRef.current !== null) {
+        window.clearTimeout(iframeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleIframeLoad = () => {
+    if (!pendingIframeSubmitRef.current) return;
+    pendingIframeSubmitRef.current = false;
+    if (iframeTimeoutRef.current !== null) {
+      window.clearTimeout(iframeTimeoutRef.current);
+      iframeTimeoutRef.current = null;
+    }
+    setSubmitState('sent');
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (submitState === 'sending' || submitState === 'sent') return;
@@ -319,11 +328,35 @@ export function Contact() {
       return;
     }
 
-    setSubmitState('sending');
+    // FormSubmit's /ajax/ endpoint drops file uploads; submit natively as multipart/form-data
+    // to the standard endpoint via a hidden iframe when an attachment is included.
+    if (attachment && formRef.current) {
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        setSubmitState('error');
+        triggerErrorShake();
+        return;
+      }
 
-    const endpoint =
-      contactCopy?.form_endpoint?.trim() ||
-      'https://formsubmit.co/ajax/info@globalmarinesupplies.com';
+      if (iframeTimeoutRef.current !== null) {
+        window.clearTimeout(iframeTimeoutRef.current);
+      }
+
+      pendingIframeSubmitRef.current = true;
+      setSubmitState('sending');
+
+      iframeTimeoutRef.current = window.setTimeout(() => {
+        if (!pendingIframeSubmitRef.current) return;
+        pendingIframeSubmitRef.current = false;
+        iframeTimeoutRef.current = null;
+        setSubmitState('error');
+        triggerErrorShake();
+      }, 35000);
+
+      formRef.current.submit();
+      return;
+    }
+
+    setSubmitState('sending');
 
     try {
       const cleanEmail = values.email.trim();
@@ -340,11 +373,7 @@ export function Contact() {
       formData.append('_captcha', 'false');
       formData.append('_honey', values.honeypot);
 
-      if (attachment) {
-        formData.append('attachment', attachment);
-      }
-
-      const response = await fetch(endpoint, {
+      const response = await fetch(ajaxEndpoint, {
         method: 'POST',
         body: formData,
         headers: {
@@ -378,6 +407,11 @@ export function Contact() {
   };
 
   const handleResetEnquiry = () => {
+    pendingIframeSubmitRef.current = false;
+    if (iframeTimeoutRef.current !== null) {
+      window.clearTimeout(iframeTimeoutRef.current);
+      iframeTimeoutRef.current = null;
+    }
     setValues({
       email: '',
       subject: '',
@@ -395,13 +429,12 @@ export function Contact() {
       id="contact"
       ref={sectionRef}
       data-nav-theme="light"
-      className="relative w-full bg-sea-salt text-deep-hull border-t border-harbour-mist/80 lg:min-h-[100svh] lg:flex lg:items-center pt-20 pb-10 lg:pt-[84px] lg:pb-8 px-6 md:px-12"
+      className="relative w-full bg-sea-salt text-deep-hull border-t border-harbour-mist/80 lg:min-h-[100dvh] flex flex-col justify-between"
     >
-      <div className="mx-auto w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-stretch">
-        {/* Left Column: Editorial Heading, Clean Contact Channels & Pure Looping Video */}
-        <div className="lg:col-span-6 flex flex-col justify-between gap-6">
-          <div>
-            {/* Editorial Headline & Subcopy */}
+      <div className="flex-1 flex items-center pt-20 pb-3 lg:pt-[84px] lg:pb-4 px-6 md:px-12">
+        <div className="mx-auto w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          {/* Left Column: Editorial Heading & Structured Contact Channels */}
+          <div className="lg:col-span-6 flex flex-col justify-center">
             <h2 className="font-display text-[clamp(2rem,2.9vw,2.75rem)] font-normal leading-[1.06] tracking-tight text-deep-hull text-balance">
               {contactCopy?.heading ?? "Let's Connect"}
             </h2>
@@ -515,186 +548,181 @@ export function Contact() {
             </div>
           </div>
 
-          {/* Bottom-Left Looping Video Frame with Subtle Black Tint & Centered Contact List CTA */}
-          <div className="relative h-[160px] sm:h-[176px] lg:flex-1 lg:min-h-[144px] lg:max-h-[196px] w-full overflow-hidden rounded-[18px] bg-deep-hull border border-deep-hull/10 shadow-hull">
-            <video
-              ref={videoRef}
-              src={loopVideoUrl}
-              autoPlay={!reduceMotion}
-              loop
-              muted
-              playsInline
-              preload="metadata"
-              aria-hidden="true"
-              className="h-full w-full object-cover"
-            />
+          {/* Right Column: Elevated White Enquiry Form Card */}
+          <div className="lg:col-span-6">
             <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 bg-black/25"
-            />
-            <div className="absolute inset-0 flex items-center justify-center p-4">
-              <button
-                type="button"
-                onClick={() => setActiveDialog('directory')}
-                aria-haspopup="dialog"
-                className="group inline-flex items-center gap-2 rounded-[10px] bg-deep-hull/90 px-4 py-2.5 font-sans text-[13px] font-medium text-sea-salt border border-white/15 shadow-hull-lg backdrop-blur-md transition-all duration-300 ease-out hover:bg-signal-blue hover:border-sonar-cyan/50 hover:-translate-y-0.5 cursor-pointer"
-              >
-                <ChatCircleDots
-                  size={16}
-                  weight="regular"
-                  className="text-sonar-cyan transition-transform duration-300 group-hover:scale-105"
-                />
-                <span>View Full Contact List</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Elevated White Enquiry Form Card */}
-        <div className="lg:col-span-6 flex">
-          <div
-            ref={formCardRef}
-            className="w-full rounded-[20px] bg-white text-deep-hull p-5 sm:p-6 lg:p-7 shadow-hull-lg border border-harbour-mist/90 flex flex-col"
-          >
-            <h3 className="font-display text-[22px] lg:text-[26px] font-normal leading-tight tracking-tight text-deep-hull">
-              {contactCopy?.form_title ?? 'Send an enquiry'}
-            </h3>
-
-            <form
-              onSubmit={handleSubmit}
-              noValidate
-              className="mt-4 flex-1 flex flex-col gap-3"
+              ref={formCardRef}
+              className="w-full rounded-[20px] bg-white text-deep-hull p-5 sm:p-6 shadow-hull-lg border border-harbour-mist/90 flex flex-col"
             >
-              {/* Hidden Honeypot Field */}
-              <div className="sr-only" aria-hidden="true">
-                <label htmlFor="gms-vessel-fax">Leave this field blank</label>
-                <input
-                  id="gms-vessel-fax"
-                  type="text"
-                  tabIndex={-1}
-                  autoComplete="off"
-                  value={values.honeypot}
-                  onChange={(e) => handleFieldChange('honeypot', e.target.value)}
-                />
-              </div>
+              <h3 className="font-display text-[22px] lg:text-[26px] font-normal leading-tight tracking-tight text-deep-hull">
+                {contactCopy?.form_title ?? 'Send an enquiry'}
+              </h3>
 
-              {/* Row 1: Email */}
-              <div>
-                <label
-                  htmlFor="contact-email"
-                  className="block font-sans text-[12px] font-medium text-deep-hull/80 mb-1"
-                >
-                  {fieldsCopy?.email_label}
-                </label>
-                <input
-                  ref={emailInputRef}
-                  id="contact-email"
-                  type="email"
-                  required
-                  value={values.email}
-                  onChange={(e) => handleFieldChange('email', e.target.value)}
-                  onBlur={() => handleFieldBlur('email')}
-                  placeholder={fieldsCopy?.email_placeholder}
-                  aria-invalid={Boolean(errors.email)}
-                  aria-describedby={
-                    errors.email ? 'contact-email-error' : undefined
-                  }
-                  className={`w-full rounded-[10px] border bg-sea-salt/70 px-3 py-2 font-sans text-[13.5px] text-deep-hull placeholder:text-deep-hull/40 transition-colors duration-200 focus:bg-white ${
-                    errors.email
-                      ? 'border-red-600'
-                      : 'border-harbour-mist focus:border-signal-blue'
-                  }`}
-                />
-                {errors.email && (
-                  <p
-                    id="contact-email-error"
-                    role="alert"
-                    className="mt-0.5 text-[11px] leading-tight text-red-700"
-                  >
-                    {errors.email}
-                  </p>
-                )}
-              </div>
+              <iframe
+                name="gms-formsubmit-frame"
+                title="Form submission target"
+                onLoad={handleIframeLoad}
+                tabIndex={-1}
+                aria-hidden="true"
+                className="invisible fixed h-0 w-0 border-0 opacity-0 pointer-events-none"
+              />
 
-              {/* Row 2: Subject */}
-              <div>
-                <label
-                  htmlFor="contact-subject"
-                  className="block font-sans text-[12px] font-medium text-deep-hull/80 mb-1"
-                >
-                  {fieldsCopy?.subject_label ?? 'Subject'}
-                </label>
+              <form
+                ref={formRef}
+                action={standardEndpoint}
+                method="POST"
+                encType="multipart/form-data"
+                target="gms-formsubmit-frame"
+                onSubmit={handleSubmit}
+                noValidate
+                className="mt-3.5 flex flex-col gap-3"
+              >
+                {/* FormSubmit Configuration Fields for Multipart Submission */}
                 <input
-                  id="contact-subject"
-                  type="text"
-                  required
-                  value={values.subject}
-                  onChange={(e) => handleFieldChange('subject', e.target.value)}
-                  onBlur={() => handleFieldBlur('subject')}
-                  placeholder={fieldsCopy?.subject_placeholder ?? 'Vessel name, IMO, or enquiry subject'}
-                  aria-invalid={Boolean(errors.subject)}
-                  aria-describedby={
-                    errors.subject ? 'contact-subject-error' : undefined
-                  }
-                  className={`w-full rounded-[10px] border bg-sea-salt/70 px-3 py-2 font-sans text-[13.5px] text-deep-hull placeholder:text-deep-hull/40 transition-colors duration-200 focus:bg-white ${
-                    errors.subject
-                      ? 'border-red-600'
-                      : 'border-harbour-mist focus:border-signal-blue'
-                  }`}
+                  type="hidden"
+                  name="_subject"
+                  value={`[GMS Website Enquiry] ${values.subject.trim()}`}
                 />
-                {errors.subject && (
-                  <p
-                    id="contact-subject-error"
-                    role="alert"
-                    className="mt-0.5 text-[11px] leading-tight text-red-700"
-                  >
-                    {errors.subject}
-                  </p>
-                )}
-              </div>
+                <input type="hidden" name="_replyto" value={values.email.trim()} />
+                <input type="hidden" name="_template" value="table" />
+                <input type="hidden" name="_captcha" value="false" />
 
-              {/* Row 3: Message / RFQ Details — expands to fill card height and match left column */}
-              <div className="flex-1 flex flex-col">
-                <label
-                  htmlFor="contact-message"
-                  className="block font-sans text-[12px] font-medium text-deep-hull/80 mb-1"
-                >
-                  {fieldsCopy?.message_label}
-                </label>
-                <textarea
-                  id="contact-message"
-                  rows={6}
-                  required
-                  value={values.message}
-                  onChange={(e) => handleFieldChange('message', e.target.value)}
-                  onBlur={() => handleFieldBlur('message')}
-                  placeholder={fieldsCopy?.message_placeholder}
-                  aria-invalid={Boolean(errors.message)}
-                  aria-describedby={
-                    errors.message ? 'contact-message-error' : undefined
-                  }
-                  className={`w-full flex-1 min-h-[140px] rounded-[10px] border bg-sea-salt/70 px-3 py-2.5 font-sans text-[13.5px] text-deep-hull placeholder:text-deep-hull/40 transition-colors duration-200 focus:bg-white resize-none ${
-                    errors.message
-                      ? 'border-red-600'
-                      : 'border-harbour-mist focus:border-signal-blue'
-                  }`}
-                />
-                {errors.message && (
-                  <p
-                    id="contact-message-error"
-                    role="alert"
-                    className="mt-0.5 text-[11px] leading-tight text-red-700"
+                {/* Hidden Honeypot Field */}
+                <div className="sr-only" aria-hidden="true">
+                  <label htmlFor="gms-vessel-fax">Leave this field blank</label>
+                  <input
+                    id="gms-vessel-fax"
+                    name="_honey"
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={values.honeypot}
+                    onChange={(e) => handleFieldChange('honeypot', e.target.value)}
+                  />
+                </div>
+
+                {/* Row 1: Email & Subject side by side */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label
+                      htmlFor="contact-email"
+                      className="block font-sans text-[12px] font-medium text-deep-hull/80 mb-1"
+                    >
+                      {fieldsCopy?.email_label}
+                    </label>
+                    <input
+                      ref={emailInputRef}
+                      id="contact-email"
+                      name="email"
+                      type="email"
+                      required
+                      value={values.email}
+                      onChange={(e) => handleFieldChange('email', e.target.value)}
+                      onBlur={() => handleFieldBlur('email')}
+                      placeholder={fieldsCopy?.email_placeholder}
+                      aria-invalid={Boolean(errors.email)}
+                      aria-describedby={
+                        errors.email ? 'contact-email-error' : undefined
+                      }
+                      className={`w-full rounded-[10px] border bg-sea-salt/70 px-3 py-2 font-sans text-[13.5px] text-deep-hull placeholder:text-deep-hull/40 transition-colors duration-200 focus:bg-white ${
+                        errors.email
+                          ? 'border-red-600'
+                          : 'border-harbour-mist focus:border-signal-blue'
+                      }`}
+                    />
+                    {errors.email && (
+                      <p
+                        id="contact-email-error"
+                        role="alert"
+                        className="mt-0.5 text-[11px] leading-tight text-red-700"
+                      >
+                        {errors.email}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="contact-subject"
+                      className="block font-sans text-[12px] font-medium text-deep-hull/80 mb-1"
+                    >
+                      {fieldsCopy?.subject_label ?? 'Subject'}
+                    </label>
+                    <input
+                      id="contact-subject"
+                      name="subject"
+                      type="text"
+                      required
+                      value={values.subject}
+                      onChange={(e) => handleFieldChange('subject', e.target.value)}
+                      onBlur={() => handleFieldBlur('subject')}
+                      placeholder={fieldsCopy?.subject_placeholder ?? 'Vessel name, IMO, or enquiry subject'}
+                      aria-invalid={Boolean(errors.subject)}
+                      aria-describedby={
+                        errors.subject ? 'contact-subject-error' : undefined
+                      }
+                      className={`w-full rounded-[10px] border bg-sea-salt/70 px-3 py-2 font-sans text-[13.5px] text-deep-hull placeholder:text-deep-hull/40 transition-colors duration-200 focus:bg-white ${
+                        errors.subject
+                          ? 'border-red-600'
+                          : 'border-harbour-mist focus:border-signal-blue'
+                      }`}
+                    />
+                    {errors.subject && (
+                      <p
+                        id="contact-subject-error"
+                        role="alert"
+                        className="mt-0.5 text-[11px] leading-tight text-red-700"
+                      >
+                        {errors.subject}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Row 2: Message / RFQ Details */}
+                <div>
+                  <label
+                    htmlFor="contact-message"
+                    className="block font-sans text-[12px] font-medium text-deep-hull/80 mb-1"
                   >
-                    {errors.message}
-                  </p>
-                )}
-              </div>
+                    {fieldsCopy?.message_label}
+                  </label>
+                  <textarea
+                    id="contact-message"
+                    name="message"
+                    rows={4}
+                    required
+                    value={values.message}
+                    onChange={(e) => handleFieldChange('message', e.target.value)}
+                    onBlur={() => handleFieldBlur('message')}
+                    placeholder={fieldsCopy?.message_placeholder}
+                    aria-invalid={Boolean(errors.message)}
+                    aria-describedby={
+                      errors.message ? 'contact-message-error' : undefined
+                    }
+                    className={`w-full min-h-[104px] rounded-[10px] border bg-sea-salt/70 px-3 py-2.5 font-sans text-[13.5px] text-deep-hull placeholder:text-deep-hull/40 transition-colors duration-200 focus:bg-white resize-none ${
+                      errors.message
+                        ? 'border-red-600'
+                        : 'border-harbour-mist focus:border-signal-blue'
+                    }`}
+                  />
+                  {errors.message && (
+                    <p
+                      id="contact-message-error"
+                      role="alert"
+                      className="mt-0.5 text-[11px] leading-tight text-red-700"
+                    >
+                      {errors.message}
+                    </p>
+                  )}
+                </div>
 
               {/* Row 4: Optional Attach a File Control */}
               <div>
                 <input
                   ref={fileInputRef}
                   id="contact-attachment"
+                  name="attachment"
                   type="file"
                   accept=".pdf,.xls,.xlsx,.csv,.doc,.docx,.jpg,.jpeg,.png,.webp"
                   onChange={handleFileChange}
@@ -826,10 +854,14 @@ export function Contact() {
                   )}
                 </div>
               )}
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Integrated Interactive Ocean Footer */}
+      <Footer />
     </section>
   );
 }

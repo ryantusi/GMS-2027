@@ -623,7 +623,7 @@ export function Hero() {
       </div>
 
       {/* Layer 2: Primary Hero Content — Centered vertically in viewport, aligned on the left with balanced breathing room */}
-      <div className="relative z-10 flex h-full w-full max-w-7xl flex-col justify-center items-start pl-6 sm:pl-10 md:pl-14 lg:pl-18 xl:pl-24 pr-6 sm:pr-10 md:pr-12 lg:pr-16 text-left">
+      <div className="relative z-10 flex h-full w-full max-w-7xl flex-col justify-center items-start pl-8 sm:pl-14 md:pl-20 lg:pl-24 xl:pl-32 pr-6 sm:pr-10 md:pr-12 lg:pr-16 text-left">
         <div className="flex flex-col items-start text-left max-w-3xl">
           {/* Brand Logo Anchor: Defines slightly smaller starting size for the single traveling logo.
               The #navbar-logo-slot element begins here, and glides into the Navbar on scroll. */}

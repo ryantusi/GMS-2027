@@ -425,7 +425,7 @@ export function Stores() {
       data-section="stores"
       data-nav-theme="dark"
       aria-label={sectionCopy?.heading ?? 'What we supply'}
-      className="relative min-h-[112dvh] w-full flex items-center bg-deep-hull text-sea-salt pt-28 pb-20 lg:pt-28 lg:pb-20 overflow-hidden"
+      className="relative min-h-[100dvh] lg:h-[100dvh] w-full flex items-center bg-deep-hull text-sea-salt pt-20 pb-8 lg:pt-[72px] lg:pb-4 overflow-hidden"
       style={{
         background:
           'radial-gradient(120% 90% at 22% 50%, var(--deep-hull) 0%, var(--night-port) 100%)',
@@ -469,7 +469,7 @@ export function Stores() {
                   }
                 }
               }}
-              className="relative w-full aspect-[4/5] sm:aspect-[16/11] lg:aspect-auto lg:h-[min(68vh,560px)] xl:h-[min(70vh,600px)] overflow-hidden rounded-[var(--radius-panel)] border border-sea-salt/12 bg-night-port shadow-xl"
+              className="relative w-full aspect-[4/5] sm:aspect-[16/11] lg:aspect-auto lg:h-[min(66vh,540px)] xl:h-[min(68vh,580px)] overflow-hidden rounded-[var(--radius-panel)] border border-sea-salt/12 bg-night-port shadow-xl"
             >
               {/* Persistent GPU-composited image layers for silky cross-dissolve and zoom */}
               {stores.map((store, idx) => (

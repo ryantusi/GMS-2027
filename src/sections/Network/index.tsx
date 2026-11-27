@@ -408,6 +408,21 @@ export function Network() {
       .filter((group) => group.locations.length > 0);
   }, [searchQuery]);
 
+  // Auto-select when a search narrows results down to a single country
+  useEffect(() => {
+    if (!searchQuery.trim()) return;
+    const totalMatches = filteredGroups.reduce(
+      (sum, group) => sum + group.locations.length,
+      0
+    );
+    if (totalMatches === 1) {
+      const singleMatch = filteredGroups[0]?.locations[0];
+      if (singleMatch) {
+        setSelectedCountryId(singleMatch.id);
+      }
+    }
+  }, [searchQuery, filteredGroups, setSelectedCountryId]);
+
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && filteredGroups.length > 0) {
       const firstMatch = filteredGroups[0].locations[0];
@@ -452,10 +467,10 @@ export function Network() {
     >
       <div className="relative z-10 mx-auto w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         {/* Left 50%: Enlarged Dark 3D Globe aligned cleanly with Contact left column */}
-        <div className="lg:col-span-6 relative flex flex-col items-center justify-center w-full">
+        <div className="lg:col-span-6 relative flex flex-col items-center lg:items-start justify-center w-full">
           <div
             ref={globeStageRef}
-            className="relative z-20 w-[78vw] max-w-[340px] sm:max-w-[440px] lg:w-full lg:max-w-[min(552px,68dvh)] xl:max-w-[min(560px,70dvh)] aspect-square flex items-center justify-center will-change-transform"
+            className="relative z-20 w-[78vw] max-w-[340px] sm:max-w-[440px] lg:w-full lg:max-w-[min(552px,68dvh)] xl:max-w-[min(560px,70dvh)] lg:-ml-10 xl:-ml-12 aspect-square flex items-center justify-center will-change-transform"
           >
             <div ref={globeEntryRef} className="w-full h-full will-change-transform">
               {shouldMountGlobe ? (
